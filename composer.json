@@ -1,0 +1,64 @@
+{
+    "name": "megaads/clara",
+    "description": "Module management in Laravel",
+    "keywords": [
+        "module",
+        "modular",
+        "lumen",
+        "laravel",
+        "refactor"
+    ],
+    "homepage": "https://www.megaads.vn",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "megaads-vn",
+            "email": "info@megaads.vn"
+        },
+        {
+            "name": "phuluong",
+            "email": "phult.contact@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.4",
+        "laravel/framework": "5.4.*",
+        "wikimedia/composer-merge-plugin": "dev-master",
+        "illuminate/support": ">=5.3",
+        "jeremeamia/superclosure": "^2.4"
+    },
+    "autoload": {
+        "file": [
+            "src/Helpers/OptionHelper.php"
+        ],
+        "classmap": [
+            "src"
+        ],
+        "psr-4": {
+            "Megaads\\Clara\\": "src/"
+        }
+    },
+    "extra": {
+        "merge-plugin": {
+            "require": [
+                "app/Modules/*/module.json"
+            ],
+            "recurse": true,
+            "replace": false,
+            "ignore-duplicates": false,
+            "merge-dev": true,
+            "merge-extra": false,
+            "merge-extra-deep": false,
+            "merge-scripts": false
+        },
+        "laravel": {
+            "providers": [
+                "Megaads\\Clara\\Providers\\ClaraServiceProvider"
+            ],
+            "aliases": {
+                "Clara": "Megaads\\Clara\\Facades\\EventFacade"
+            }
+        }
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "name": "example",
+    "description": "ShopBay product module",
+    "type": "module",
+    "autoload": {
+        "files": [
+            "Helpers/helper.php"
+        ]
+    },
+    "require": {
+        "php": ">=5.6.4",
+        "laravel/framework": "5.4.*"
+    },
+    "options": {
+        "option.header": {
+            "name": "Module header",
+            "type": "string",
+            "default": "Example Module"
+        },
+        "option.pageSize": {
+            "name": "Data page size",
+            "type": "interger",
+            "default": 20
+        },
+        "option.sortBy": {
+            "name": "Data sort type",
+            "type": "enum",
+            "values": "id,create_time",
+            "default": "id"
+        }
+    }
+}

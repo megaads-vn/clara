@@ -1,0 +1,1 @@
+<div>{{$moduleHeader}}</div>
