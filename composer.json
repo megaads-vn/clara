@@ -29,7 +29,7 @@
         "jeremeamia/superclosure": "^2.4"
     },
     "autoload": {
-        "file": [
+        "files": [
             "src/Helpers/OptionHelper.php"
         ],
         "classmap": [
