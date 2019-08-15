@@ -5,6 +5,8 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Megaads\Clara\Commands\ModuleMakeCommand;
+use Megaads\Clara\Commands\ModuleRemoveAllCommand;
+use Megaads\Clara\Commands\ModuleRemoveCommand;
 use Megaads\Clara\Event\Events;
 
 class ClaraServiceProvider extends ServiceProvider
@@ -12,6 +14,8 @@ class ClaraServiceProvider extends ServiceProvider
     protected $files;
     protected $commands = [
         ModuleMakeCommand::class,
+        ModuleRemoveCommand::class,
+        ModuleRemoveAllCommand::class,
     ];
     /**
      * Bootstrap the application services.
