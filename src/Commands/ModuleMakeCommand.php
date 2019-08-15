@@ -26,16 +26,27 @@ class ModuleMakeCommand extends Command
     {
         $names = $this->argument('name');
         $moduleDir = app_path() . '/Modules/';
-        $exampleModuleDir = __DIR__ . '/../ModuleExample';
+        $exampleModuleDir = __DIR__ . '/../ExampleModule';
         if (File::isDirectory($moduleDir)) {
             File::makeDirectory($moduleDir, 0777, true, true);
         }
         foreach ($names as $name) {
             $currentModuleDir = $moduleDir . $name;
             if (File::isDirectory($currentModuleDir)) {
-                $this->error("Make $name module failed.");
+                $this->error("Make $name module failed. The module's existed.");
             } else {
                 File::copyDirectory($exampleModuleDir, $moduleDir . $name);
+                $moduleFiles = File::allFiles($moduleDir . $name);
+                foreach ($moduleFiles as $moduleFile) {
+                    $moduleSlug = strtolower(preg_replace('/\B([A-Z])/', '-$1', $name));
+                    $this->replaceInFile($moduleFile->getPathname(), 'Modules\\Example', 'Modules\\' . $name);
+                    $this->replaceInFile($moduleFile->getPathname(), 'ExampleModule', $name . 'Module');
+                    $this->replaceInFile($moduleFile->getPathname(), 'Example Module', $name . ' Module');                    
+                    $this->replaceInFile($moduleFile->getPathname(), 'example-module', $moduleSlug . '-module');
+                    $this->replaceInFile($moduleFile->getPathname(), 'exampleModule', $moduleSlug . 'Module');
+                    $this->replaceInFile($moduleFile->getPathname(), 'example::', $moduleSlug . '::');
+                }
+                system('composer dump-autoload');
                 $this->line("Make $name module successfully.");
             }
         }
@@ -50,5 +61,11 @@ class ModuleMakeCommand extends Command
         return [
             ['name', InputArgument::IS_ARRAY, 'The names of modules will be created.'],
         ];
+    }
+    private function replaceInFile($filePath, $findString, $replaceString)
+    {
+        $fileContent = file_get_contents($filePath);
+        $fileContent = str_replace($findString, $replaceString, $fileContent);
+        file_put_contents($filePath, $fileContent);
     }
 }

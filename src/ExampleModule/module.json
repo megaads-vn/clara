@@ -1,6 +1,6 @@
 {
-    "name": "example",
-    "description": "ShopBay product module",
+    "name": "ExampleModule",
+    "description": "",
     "type": "module",
     "autoload": {
         "files": [
@@ -15,7 +15,7 @@
         "option.header": {
             "name": "Module header",
             "type": "string",
-            "default": "Example Module"
+            "default": "New Module header"
         },
         "option.pageSize": {
             "name": "Data page size",

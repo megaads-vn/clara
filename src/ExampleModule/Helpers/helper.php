@@ -1,6 +1,6 @@
 <?php
 
-function exampleHelper()
+function exampleModuleHelper()
 {
     return "hello Example";
 }
