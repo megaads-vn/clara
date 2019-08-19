@@ -4,13 +4,13 @@ namespace Modules\Example\Controllers;
 
 use Illuminate\Http\Request;
 use Modules\Example\Controllers\Controller;
-use Clara;
+use Module;
 
 class HomeController extends Controller
 {
     public function __construct()
     {        
-        Clara::onView("content", function() {
+        Module::onView("content", function() {
             return "This is content view from Example Module HomeController";
         }, 5);
     }

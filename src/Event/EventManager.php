@@ -2,7 +2,7 @@
 
 namespace Megaads\Clara\Event;
 
-class Events
+class EventManager
 {
     /**
      * Holds all registered actions.

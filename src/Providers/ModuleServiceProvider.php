@@ -7,9 +7,9 @@ use Illuminate\Support\ServiceProvider;
 use Megaads\Clara\Commands\ModuleMakeCommand;
 use Megaads\Clara\Commands\ModuleRemoveAllCommand;
 use Megaads\Clara\Commands\ModuleRemoveCommand;
-use Megaads\Clara\Event\Events;
+use Megaads\Clara\Module;
 
-class ClaraServiceProvider extends ServiceProvider
+class ModuleServiceProvider extends ServiceProvider
 {
     protected $files;
     protected $commands = [
@@ -30,7 +30,7 @@ class ClaraServiceProvider extends ServiceProvider
             foreach ($modules as $module) {
                 $currentModuleDir = app_path() . '/Modules/' . $module;
                 $moduleName = strtolower(preg_replace('/\B([A-Z])/', '-$1', $module));
-                $appFile = $currentModuleDir . '/app.php';
+                $appFile = $currentModuleDir . '/start.php';
                 if ($this->files->exists($appFile)) {
                     include $appFile;
                 }
@@ -55,13 +55,13 @@ class ClaraServiceProvider extends ServiceProvider
          * Adds a directive in Blade for actions
          */
         Blade::directive('action', function ($expression) {
-            return "<?php Clara::action({$expression}); ?>";
+            return "<?php Module::action({$expression}); ?>";
         });
         /*
          * Adds a directive in Blade for views
          */
         Blade::directive('view', function ($expression) {
-            return "<?php echo Clara::view({$expression}); ?>";
+            return "<?php echo Module::view({$expression}); ?>";
         });
     }
     private function loadKernel($module)
@@ -111,8 +111,8 @@ class ClaraServiceProvider extends ServiceProvider
     public function register()
     {
         $this->files = new Filesystem();
-        $this->app->singleton('Clara', function ($app) {
-            return new Events();
+        $this->app->singleton('Module', function ($app) {
+            return new Module();
         });
         $this->commands($this->commands);
     }
