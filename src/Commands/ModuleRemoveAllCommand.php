@@ -3,9 +3,9 @@ namespace Megaads\Clara\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Symfony\Component\Console\Input\InputArgument;
+use Megaads\Clara\Utils\ModuleUtil;
 
-class ModuleRemoveAllCommand extends Command
+class ModuleRemoveAllCommand extends AbtractCommand
 {
     /**
      * The console command name.
@@ -27,21 +27,13 @@ class ModuleRemoveAllCommand extends Command
         $moduleDir = app_path() . '/Modules';
         if (File::isDirectory($moduleDir)) {
             File::deleteDirectory($moduleDir);
+            $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+            $moduleConfigs['modules'] = [];
+            ModuleUtil::setModuleConfig($moduleConfigs);
             system('composer dump-autoload');
-            $this->line("Remove all modules successfully.");
+            $this->info("Remove all modules successfully.");
         } else {
             $this->error("Remove all modules failed. There are not any modules.");
         }
-    }
-    /**
-     * Get the console command arguments.
-     *
-     * @return array
-     */
-    protected function getArguments()
-    {
-        return [
-            ['name', InputArgument::IS_ARRAY, 'The names of modules will be created.'],
-        ];
     }
 }

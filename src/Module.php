@@ -3,6 +3,7 @@
 namespace Megaads\Clara;
 
 use Megaads\Clara\Event\EventManager;
+use Megaads\Clara\Utils\ModuleUtil;
 
 class Module extends EventManager
 {
@@ -10,7 +11,9 @@ class Module extends EventManager
      * Get all modules.
      */
     public function all()
-    {        
+    {
+        $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+        return $moduleConfigs['modules'];
     }
     /**
      * Get module is calling current function.

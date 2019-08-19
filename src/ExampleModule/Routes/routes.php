@@ -10,9 +10,9 @@
 | contains the "web" middleware group. Now create something great!
 |
  */
-Route::group(['prefix' => 'example-module', 'middleware' => 'example'], function () {
+Route::group(['prefix' => '{{MODULE_NAMESPACE}}', 'middleware' => 'example'], function () {
     Route::get('/', [
-        'as' => 'example-module::home',
+        'as' => '{{MODULE_NAMESPACE}}::home',
         'uses' => 'HomeController@index',
     ]);
 });

@@ -1,5 +1,6 @@
 {
-    "name": "ExampleModule",
+    "name": "{{MODULE_NAME}}",
+    "namespace": "{{MODULE_NAMESPACE}}",
     "description": "",
     "type": "module",
     "autoload": {

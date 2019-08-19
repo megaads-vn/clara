@@ -4,10 +4,14 @@ namespace Megaads\Clara\Providers;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Megaads\Clara\Commands\ModuleDisableCommand;
+use Megaads\Clara\Commands\ModuleEnableCommand;
+use Megaads\Clara\Commands\ModuleListCommand;
 use Megaads\Clara\Commands\ModuleMakeCommand;
 use Megaads\Clara\Commands\ModuleRemoveAllCommand;
 use Megaads\Clara\Commands\ModuleRemoveCommand;
 use Megaads\Clara\Module;
+use Megaads\Clara\Utils\ModuleUtil;
 
 class ModuleServiceProvider extends ServiceProvider
 {
@@ -16,6 +20,9 @@ class ModuleServiceProvider extends ServiceProvider
         ModuleMakeCommand::class,
         ModuleRemoveCommand::class,
         ModuleRemoveAllCommand::class,
+        ModuleEnableCommand::class,
+        ModuleDisableCommand::class,
+        ModuleListCommand::class,
     ];
     /**
      * Bootstrap the application services.
@@ -28,8 +35,13 @@ class ModuleServiceProvider extends ServiceProvider
         if (is_dir($moduleDir)) {
             $modules = array_map('class_basename', $this->files->directories($moduleDir));
             foreach ($modules as $module) {
+                $moduleNamespace = strtolower(preg_replace('/\B([A-Z])/', '-$1', $module));
+                $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+                if ($moduleConfigs['modules'][$moduleNamespace] == null
+                    || $moduleConfigs['modules'][$moduleNamespace]['status'] == 'disable') {
+                    continue;
+                }
                 $currentModuleDir = app_path() . '/Modules/' . $module;
-                $moduleName = strtolower(preg_replace('/\B([A-Z])/', '-$1', $module));
                 $appFile = $currentModuleDir . '/start.php';
                 if ($this->files->exists($appFile)) {
                     include $appFile;
@@ -43,11 +55,11 @@ class ModuleServiceProvider extends ServiceProvider
                 }
                 $configDir = $currentModuleDir . '/Config';
                 if ($this->files->isDirectory($configDir)) {
-                    $this->loadConfig($configDir, $moduleName);
+                    $this->loadConfig($configDir, $moduleNamespace);
                 }
                 $viewDir = $currentModuleDir . '/Resources/Views';
                 if ($this->files->isDirectory($viewDir)) {
-                    $this->loadViewsFrom($viewDir, $moduleName);
+                    $this->loadViewsFrom($viewDir, $moduleNamespace);
                 }
             }
         }
@@ -87,20 +99,20 @@ class ModuleServiceProvider extends ServiceProvider
             }
         }
     }
-    private function loadConfig($configDir, $module = null)
+    private function loadConfig($configDir, $moduleNamespace = null)
     {
         $files = $this->app['files']->files($configDir);
-        $module = $module ? $module . '::' : '';
+        $moduleNamespace = $moduleNamespace ? $moduleNamespace . '::' : '';
         foreach ($files as $file) {
             $config = $this->app['files']->getRequire($file);
             $name = $this->app['files']->name($file);
             // special case for files named config.php (config keyword is omitted)
             // if ($name === 'config') {
             foreach ($config as $key => $value) {
-                $this->app['config']->set($module . $key, $value);
+                $this->app['config']->set($moduleNamespace . $key, $value);
             }
             // }
-            $this->app['config']->set($module . $name, $config);
+            $this->app['config']->set($moduleNamespace . $name, $config);
         }
     }
     /**

@@ -3,9 +3,9 @@ namespace Megaads\Clara\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Symfony\Component\Console\Input\InputArgument;
+use Megaads\Clara\Utils\ModuleUtil;
 
-class ModuleMakeCommand extends Command
+class ModuleMakeCommand extends AbtractCommand
 {
     /**
      * The console command name.
@@ -31,6 +31,7 @@ class ModuleMakeCommand extends Command
             File::makeDirectory($moduleDir, 0777, true, true);
         }
         foreach ($names as $name) {
+            $moduleNamespace = $this->buildNamespace($name);
             $currentModuleDir = $moduleDir . $name;
             if (File::isDirectory($currentModuleDir)) {
                 $this->error("Make $name module failed. The module's existed.");
@@ -38,34 +39,22 @@ class ModuleMakeCommand extends Command
                 File::copyDirectory($exampleModuleDir, $moduleDir . $name);
                 $moduleFiles = File::allFiles($moduleDir . $name);
                 foreach ($moduleFiles as $moduleFile) {
-                    $moduleSlug = strtolower(preg_replace('/\B([A-Z])/', '-$1', $name));
                     $this->replaceInFile($moduleFile->getPathname(), 'Modules\\Example', 'Modules\\' . $name);
-                    $this->replaceInFile($moduleFile->getPathname(), 'ExampleModule', $name . 'Module');
-                    $this->replaceInFile($moduleFile->getPathname(), 'Example Module', $name . ' Module');                    
-                    $this->replaceInFile($moduleFile->getPathname(), 'example-module', $moduleSlug . '-module');
-                    $this->replaceInFile($moduleFile->getPathname(), 'exampleModule', $moduleSlug . 'Module');
-                    $this->replaceInFile($moduleFile->getPathname(), 'example::', $moduleSlug . '::');
+                    $this->replaceInFile($moduleFile->getPathname(), 'Example Module', $name . ' Module');
+                    $this->replaceInFile($moduleFile->getPathname(), 'example::', $moduleNamespace . '::');
+                    $this->replaceInFile($moduleFile->getPathname(), '{{MODULE_NAME}}', $name);
+                    $this->replaceInFile($moduleFile->getPathname(), '{{MODULE_NAMESPACE}}', $moduleNamespace);
                 }
+                $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+                $moduleConfigs['modules'][$moduleNamespace] = [
+                    'name' => $name,
+                    'namespace' => $moduleNamespace,
+                    'status' => 'enable',
+                ];
+                ModuleUtil::setModuleConfig($moduleConfigs);
                 system('composer dump-autoload');
-                $this->line("Make $name module successfully.");
+                $this->info("Make $name module successfully.");
             }
         }
-    }
-    /**
-     * Get the console command arguments.
-     *
-     * @return array
-     */
-    protected function getArguments()
-    {
-        return [
-            ['name', InputArgument::IS_ARRAY, 'The names of modules will be created.'],
-        ];
-    }
-    private function replaceInFile($filePath, $findString, $replaceString)
-    {
-        $fileContent = file_get_contents($filePath);
-        $fileContent = str_replace($findString, $replaceString, $fileContent);
-        file_put_contents($filePath, $fileContent);
     }
 }
