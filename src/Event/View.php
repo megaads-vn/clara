@@ -34,9 +34,9 @@ class View extends AbtractEvent
                         break;
                     }
                 }
-                if ($isMultiLayer) {
+                if ($isMultiLayer || $isMultiLayer === null) {
                     $this->value .= call_user_func_array($this->getFunction($listener['callback']), $parameters);
-                } else {
+                } else if ($isMultiLayer === false) {
                     $this->value = call_user_func_array($this->getFunction($listener['callback']), $parameters);
                     return false;
                 }
