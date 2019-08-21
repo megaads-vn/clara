@@ -1,4 +1,4 @@
-<?
+<?php
 function getCallerModule()
 {
     $retval = null;

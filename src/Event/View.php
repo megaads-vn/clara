@@ -14,7 +14,7 @@ class View extends AbtractEvent
      *
      * @return string Always returns the value
      */
-    public function fire($action, $args, $isMultiLayer = false)
+    public function fire($action, $args = [], $isMultiLayer = true)
     {
         $this->value = isset($args[0]) ? $args[0] : ''; // get the value, the first argument is always the value
         if (!is_string($this->value)) {
@@ -26,8 +26,13 @@ class View extends AbtractEvent
                 $parameters = [];
                 // $args[0] = $this->value;
                 for ($i = 0; $i < $listener['arguments']; $i++) {
-                    $value = $args[$i];
-                    $parameters[] = $value;
+                    if (isset($args[$i])) {
+                        $value = $args[$i];
+                        $parameters[] = $value;
+                    } else {
+                        $parameters[] = [];
+                        break;
+                    }
                 }
                 if ($isMultiLayer) {
                     $this->value .= call_user_func_array($this->getFunction($listener['callback']), $parameters);
