@@ -85,7 +85,7 @@ abstract class AbtractEvent
      */
     public function getListeners()
     {
-        return $this->listeners->sortBy('priority');
+        return $this->listeners->sortByDesc('priority');
     }
 
     /**
