@@ -154,8 +154,13 @@ class EventManager
     {
         $args = func_get_args();
         $hook = $args[0];
+        $isMultiLayer = null;
+        if (count($args) == 3) {
+            $isMultiLayer = $args[2];
+            unset($args[2]);
+        }
         unset($args[0]);
         $args = array_values($args);
-        return $this->view->fire($hook, $args);
+        return $this->view->fire($hook, $args, $isMultiLayer);
     }
 }
