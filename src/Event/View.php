@@ -35,14 +35,23 @@ class View extends AbtractEvent
                     }
                 }
                 if ($isMultiLayer || $isMultiLayer === null) {
-                    $this->value .= call_user_func_array($this->getFunction($listener['callback']), $parameters);
+                    $this->value .= $this->callListenerFunction($listener, $parameters);
                 } else if ($isMultiLayer === false) {
-                    $this->value = call_user_func_array($this->getFunction($listener['callback']), $parameters);
-                    return false;
+                    $this->value = $this->callListenerFunction($listener, $parameters);
                 }
             });
         }
-
         return $this->value;
+    }
+    private function callListenerFunction($listener, $parameters)
+    {
+        $retval = null;
+        $fn = $this->getFunction($listener['callback']);
+        if (is_string($fn) && strpos($fn, '@')) {
+            $retval = \App::call($fn, $parameters);
+        } else {
+            $retval = call_user_func_array($this->getFunction($listener['callback']), $parameters);
+        }
+        return $retval;
     }
 }

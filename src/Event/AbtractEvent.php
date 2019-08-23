@@ -97,10 +97,7 @@ abstract class AbtractEvent
      */
     protected function getFunction($callback)
     {
-        if (is_string($callback) && strpos($callback, '@')) {
-            $callback = explode('@', $callback);
-            return [app('\\' . $callback[0]), $callback[1]];
-        } elseif (is_callable($callback)) {
+        if (is_callable($callback) || (is_string($callback) && strpos($callback, '@'))) {
             return $callback;
         } else {
             throw new \Exception('$callback is not a Callable', 1);
