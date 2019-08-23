@@ -29,8 +29,9 @@ class ModuleRemoveCommand extends AbtractCommand
             $namespace = $this->buildNamespace($name);
             $moduleDir = app_path() . '/Modules/' . $name;
             if (File::isDirectory($moduleDir)) {
-                File::deleteDirectory($moduleDir);
                 $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+                \Module::action("module_removed", $moduleConfigs['modules'][$namespace]);
+                File::deleteDirectory($moduleDir);
                 unset($moduleConfigs['modules'][$namespace]);
                 ModuleUtil::setModuleConfig($moduleConfigs);
                 system('composer dump-autoload');

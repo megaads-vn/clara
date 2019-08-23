@@ -33,6 +33,7 @@ class ModuleDisableCommand extends AbtractCommand
                 $moduleConfigs['modules'][$moduleNamespace]['status'] = 'disable';
                 ModuleUtil::setModuleConfig($moduleConfigs);
                 $this->info("Disable $name module successfully.");
+                \Module::action("module_disabled", $moduleConfigs['modules'][$moduleNamespace]);
             }
         }
     }

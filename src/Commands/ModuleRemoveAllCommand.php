@@ -28,10 +28,11 @@ class ModuleRemoveAllCommand extends AbtractCommand
         if (File::isDirectory($moduleDir)) {
             File::deleteDirectory($moduleDir);
             $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+            \Module::action("module_removed_all", $moduleConfigs['modules']);
             $moduleConfigs['modules'] = [];
             ModuleUtil::setModuleConfig($moduleConfigs);
             system('composer dump-autoload');
-            $this->info("Remove all modules successfully.");
+            $this->info("Remove all modules successfully.");            
         } else {
             $this->error("Remove all modules failed. There are not any modules.");
         }

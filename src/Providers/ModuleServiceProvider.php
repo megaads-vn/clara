@@ -31,16 +31,24 @@ class ModuleServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Adds a directive in Blade for actions
+        Blade::directive('action', function ($expression) {
+            return "<?php Module::action({$expression}); ?>";
+        });
+        // Adds a directive in Blade for views
+        Blade::directive('view', function ($expression) {
+            return "<?php echo Module::view({$expression}); ?>";
+        });
+        // Load enabled modules
         $moduleDir = app_path() . '/Modules/';
         if (is_dir($moduleDir)) {
-            $modules = array_map('class_basename', $this->files->directories($moduleDir));
-            foreach ($modules as $module) {
-                $moduleNamespace = strtolower(preg_replace('/\B([A-Z])/', '-$1', $module));
-                $moduleConfigs = ModuleUtil::getAllModuleConfigs();
-                if ($moduleConfigs['modules'][$moduleNamespace] == null
-                    || $moduleConfigs['modules'][$moduleNamespace]['status'] == 'disable') {
+            $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+            foreach ($moduleConfigs['modules'] as $moduleConfig) {
+                if ($moduleConfig['status'] == 'disable') {
                     continue;
                 }
+                $moduleNamespace = $moduleConfig['namespace'];
+                $module = $moduleConfig['name'];
                 $currentModuleDir = app_path() . '/Modules/' . $module;
                 $appFile = $currentModuleDir . '/start.php';
                 if ($this->files->exists($appFile)) {
@@ -61,20 +69,9 @@ class ModuleServiceProvider extends ServiceProvider
                 if ($this->files->isDirectory($viewDir)) {
                     $this->loadViewsFrom($viewDir, $moduleNamespace);
                 }
+                \Module::action("module_loaded", $moduleConfig);
             }
         }
-        /*
-         * Adds a directive in Blade for actions
-         */
-        Blade::directive('action', function ($expression) {
-            return "<?php Module::action({$expression}); ?>";
-        });
-        /*
-         * Adds a directive in Blade for views
-         */
-        Blade::directive('view', function ($expression) {
-            return "<?php echo Module::view({$expression}); ?>";
-        });
     }
     private function loadKernel($module)
     {

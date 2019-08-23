@@ -10,6 +10,6 @@ Module::onView('header', function ($data) {
 Module::onView('content', function ($data) {
     return 'This is content view from Example Module';
 });
-Module::onAction('init', function ($data) {
-    var_dump('on init action: ' . json_encode($data));
+Module::onAction('module_loaded', function ($data) {
+    var_dump('on module_loaded: ' . json_encode($data));
 }, 10);

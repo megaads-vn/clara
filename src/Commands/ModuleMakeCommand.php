@@ -50,10 +50,11 @@ class ModuleMakeCommand extends AbtractCommand
                     'name' => $name,
                     'namespace' => $moduleNamespace,
                     'status' => 'enable',
-                ];
+                ];                
                 ModuleUtil::setModuleConfig($moduleConfigs);
                 system('composer dump-autoload');
                 $this->info("Make $name module successfully.");
+                \Module::action("module_made", $moduleConfigs['modules'][$moduleNamespace]);
             }
         }
     }
