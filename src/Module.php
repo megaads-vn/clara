@@ -16,6 +16,22 @@ class Module extends EventManager
         return $moduleConfigs['modules'];
     }
     /**
+     * Get the current module detail.
+     */
+    public function this()
+    {
+        $retval = null;
+        $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+        $moduleName = $this->getCaller();
+        foreach ($moduleConfigs['modules'] as $item) {
+            if ($item['name'] === $moduleName) {
+                $retval = $item;
+                break;
+            }
+        }
+        return $retval;
+    }
+    /**
      * Get module is calling current function.
      */
     public function getCaller()
