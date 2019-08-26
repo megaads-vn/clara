@@ -55,7 +55,7 @@ app
 │
 └───Modules
     
-    └───Example
+    └───ModuleName
         │
         └───Config
         │      app.php
@@ -115,13 +115,13 @@ php artisan module:remove <ModuleName> ...
 php artisan module:remove-all
 ```
 
-## Module Event
+## Module Action
 
 ### Fire a action
 
 Using PHP
 ```php
-Module:action('action_name', [params]);
+Module::action('action_name', [params]);
 ```
 
 Using blade statement
@@ -149,14 +149,14 @@ By default, Clara supplies actions:
 
 ## Module View
 
-### Place a view
+### Register a view
 
 Using PHP
 ```php
-Module:view('view_name', [params], IS_MULTI_LAYER);
+Module::view('view_name', [params], IS_MULTI_LAYER);
 ```
 ```php
-Module:view('view_name', 'This is a view placeholder', IS_MULTI_LAYER);
+Module::view('view_name', 'This is a view placeholder', IS_MULTI_LAYER);
 ```
 
 Using blade statement
@@ -167,7 +167,7 @@ Using blade statement
 ### Handle a view
 ```php
 Module::onView('view_name', function ($params) {  
-    return view('example:home.index');
+    return view('module-namespace:home.index');
 }, PRIORITY);
 ```
 Handle a view using a controller
