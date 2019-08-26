@@ -90,6 +90,8 @@ app
         │
         └───start.php
 ```
+- module.json: the module configuration file is based on composer package.json. All configurations in the module.json will be merged to main package.json.
+- start.php: the module's start file that will be loaded every requests. So module actions, module views... can be registered in this file.
 
 ### Enable module
 
