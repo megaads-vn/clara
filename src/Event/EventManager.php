@@ -15,6 +15,7 @@ class EventManager
      *
      */
     protected $view;
+    protected $hookIdx = [];
 
     /**
      * Construct the class.
@@ -154,6 +155,11 @@ class EventManager
     {
         $args = func_get_args();
         $hook = $args[0];
+        if (array_key_exists($hook, $this->hookIdx)) {
+            $this->hookIdx[$hook]++;
+        } else {
+            $this->hookIdx[$hook] = 0;
+        }
         $isMultiLayer = null;
         if (count($args) == 3) {
             $isMultiLayer = $args[2];
@@ -161,6 +167,9 @@ class EventManager
         }
         unset($args[0]);
         $args = array_values($args);
+        if (is_array($args[0])) {
+            $args[0]['view_idx'] = $this->hookIdx[$hook];
+        }
         return $this->view->fire($hook, $args, $isMultiLayer);
     }
 }
