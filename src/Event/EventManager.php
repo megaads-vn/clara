@@ -167,6 +167,9 @@ class EventManager
         }
         unset($args[0]);
         $args = array_values($args);
+        if (!isset($args[0])) {
+            $args[0] = [];
+        }
         if (is_array($args[0])) {
             $args[0]['view_idx'] = $this->hookIdx[$hook];
         }
