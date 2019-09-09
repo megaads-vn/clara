@@ -124,20 +124,7 @@ class ModuleServiceProvider extends ServiceProvider
             return new Module();
         });
         $this->commands($this->commands);
-    }
-    /**
-     * Register the "make:module" console command.
-     *
-     * @return Console\ModuleMakeCommand
-     */
-    protected function registerMakeCommand()
-    {
-        $this->commands('modules.make');
-        $bind_method = method_exists($this->app, 'bindShared') ? 'bindShared' : 'singleton';
-        $this->app->{$bind_method}('modules.make', function ($app) {
-            return new Megaads\Clara\Commands($this->files);
-        });
-    }
+    }    
     /**
      * @return array
      */

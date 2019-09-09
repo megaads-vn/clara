@@ -21,9 +21,20 @@ function getModuleOption($option = "")
     $retval = null;
     $module = getCallerModule();
     $key = $module == null ? $option : $module . '.' . $option;
-    $retval = \DB::table("clara_option")->where("key", "=", $key)->first();
+    $retval = \Megaads\Clara\Models\Option::where("key", "=", $key)->first();
     if ($retval != null) {
         $retval = $retval->value;
+    }
+    return $retval;
+}
+function getAllModuleOptions($module = null)
+{
+    $retval = [];
+    if ($module == null) {
+        $module = getCallerModule();
+    }
+    if ($module != null) {
+        $retval = \Megaads\Clara\Models\Option::where("key", "LIKE", $module . ".%")->get()->toArray();
     }
     return $retval;
 }
