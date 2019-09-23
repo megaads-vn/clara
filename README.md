@@ -93,6 +93,12 @@ app
 - module.json: the module configuration file is based on composer composer.json. All configurations in the module.json will be merged to main composer.json.
 - start.php: the module's start file that will be loaded every requests. So module actions, module views... can be registered in this file.
 
+### Download and install module from an URL
+
+```
+php artisan module:download <ZipFileURL> ...
+```
+
 ### Enable module
 
 ```
