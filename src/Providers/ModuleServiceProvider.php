@@ -5,6 +5,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Megaads\Clara\Commands\ModuleDisableCommand;
+use Megaads\Clara\Commands\ModuleDownloadCommand;
 use Megaads\Clara\Commands\ModuleEnableCommand;
 use Megaads\Clara\Commands\ModuleListCommand;
 use Megaads\Clara\Commands\ModuleMakeCommand;
@@ -23,6 +24,7 @@ class ModuleServiceProvider extends ServiceProvider
         ModuleEnableCommand::class,
         ModuleDisableCommand::class,
         ModuleListCommand::class,
+        ModuleDownloadCommand::class,
     ];
     /**
      * Bootstrap the application services.
@@ -124,7 +126,7 @@ class ModuleServiceProvider extends ServiceProvider
             return new Module();
         });
         $this->commands($this->commands);
-    }    
+    }
     /**
      * @return array
      */

@@ -36,4 +36,15 @@ class ModuleUtil
         }
         return $retval;
     }
+
+    public static function getModuleSpecs($modulePath)
+    {
+        $retval = [];
+        $moduleSpecFile = $modulePath . '/module.json';
+        if (File::exists($moduleSpecFile)) {
+            $jsonString = file_get_contents($moduleSpecFile);
+            $retval = json_decode($jsonString, true);
+        }
+        return $retval;
+    }
 }

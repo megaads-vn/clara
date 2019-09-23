@@ -12,12 +12,12 @@ class AbtractCommand extends Command
      *
      * @return array
      */
-    protected function getArguments()
+    function getArguments()
     {
         return [
             ['name', InputArgument::IS_ARRAY, 'The names of modules will be created.'],
         ];
-    }    
+    }
     /**
      * Replace a tring in a file
      */
