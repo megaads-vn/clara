@@ -28,11 +28,25 @@ class ModuleEnableCommand extends AbtractCommand
             $moduleNamespace = $this->buildNamespace($name);
             $moduleConfigs = ModuleUtil::getAllModuleConfigs();
             if ($moduleConfigs['modules'][$moduleNamespace] == null) {
-                $this->error("Enable $name module failed. The module's existed.");
+                $this->response([
+                    "status" => "fail",
+                    "message" => "Enable $name module failed. The module's existed.",
+                    "module" => [
+                        "name" => $name,
+                        "namespace" => $moduleNamespace,
+                    ],
+                ]);
             } else {
                 $moduleConfigs['modules'][$moduleNamespace]['status'] = 'enable';
                 ModuleUtil::setModuleConfig($moduleConfigs);
-                $this->info("Enable $name module successfully.");
+                $this->response([
+                    "status" => "successful",
+                    "message" => "Enable $name module successfully.",
+                    "module" => [
+                        "name" => $name,
+                        "namespace" => $moduleNamespace,
+                    ],
+                ]);
                 \Module::action("module_enabled", $moduleConfigs['modules'][$moduleNamespace]);
             }
         }

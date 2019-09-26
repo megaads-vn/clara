@@ -35,9 +35,23 @@ class ModuleRemoveCommand extends AbtractCommand
                 unset($moduleConfigs['modules'][$namespace]);
                 ModuleUtil::setModuleConfig($moduleConfigs);
                 system('composer dump-autoload');
-                $this->info("Remove $name module successfully.");
+                $this->response([
+                    "status" => "successful",
+                    "message" => "Remove $name module successfully.",
+                    "module" => [
+                        "name" => $name,
+                        "namespace" => $namespace,
+                    ],
+                ]);
             } else {
-                $this->error("Remove $name module failed. The module's not existed.");
+                $this->response([
+                    "status" => "fail",
+                    "message" => "Remove $name module failed. The module's not existed.",
+                    "module" => [
+                        "name" => $name,
+                        "namespace" => $namespace,
+                    ],
+                ]);
             }
         }
     }

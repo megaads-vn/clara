@@ -34,7 +34,14 @@ class ModuleMakeCommand extends AbtractCommand
             $moduleNamespace = $this->buildNamespace($name);
             $currentModuleDir = $moduleDir . $name;
             if (File::isDirectory($currentModuleDir)) {
-                $this->error("Make $name module failed. The module's existed.");
+                $this->response([
+                    "status" => "fail",
+                    "message" => "Make $name module failed. The module's existed.",
+                    "module" => [
+                        "name" => $name,
+                        "namespace" => $moduleNamespace,
+                    ],
+                ]);
             } else {
                 File::copyDirectory($exampleModuleDir, $moduleDir . $name);
                 $moduleFiles = File::allFiles($moduleDir . $name);
@@ -50,10 +57,17 @@ class ModuleMakeCommand extends AbtractCommand
                     'name' => $name,
                     'namespace' => $moduleNamespace,
                     'status' => 'enable',
-                ];                
+                ];
                 ModuleUtil::setModuleConfig($moduleConfigs);
                 system('composer dump-autoload');
-                $this->info("Make $name module successfully.");
+                $this->response([
+                    "status" => "successful",
+                    "message" => "Make $name module successfully.",
+                    "module" => [
+                        "name" => $name,
+                        "namespace" => $moduleNamespace,
+                    ],
+                ]);
                 \Module::action("module_made", $moduleConfigs['modules'][$moduleNamespace]);
             }
         }

@@ -46,7 +46,16 @@ class ModuleDownloadCommand extends AbtractCommand
             $currentModuleName = basename($url, ".zip");
             $currentModuleDir = app_path() . '/Modules/' . $currentModuleName;
             if (File::isDirectory($currentModuleDir)) {
-                $this->error("Download $currentModuleName module failed. The module's existed.");
+                $moduleSpecs = ModuleUtil::getModuleSpecs($currentModuleDir);
+                $currentModuleNamespace = $moduleSpecs['namespace'];
+                $this->response([
+                    "status" => "fail",
+                    "message" => "Download $currentModuleName module failed. The module's existed.",
+                    "module" => [
+                        "name" => $currentModuleName,
+                        "namespace" => $currentModuleNamespace,
+                    ],
+                ]);
             } else {
                 file_put_contents($moduleTmpZip, fopen($url, 'r'));
                 $zipArchive = new \ZipArchive();
@@ -64,10 +73,24 @@ class ModuleDownloadCommand extends AbtractCommand
                     ];
                     ModuleUtil::setModuleConfig($moduleConfigs);
                     system('composer dump-autoload');
-                    $this->info("Download $currentModuleName module successfully.");
+                    $this->response([
+                        "status" => "successful",
+                        "message" => "Download $currentModuleName module successfully.",
+                        "module" => [
+                            "name" => $currentModuleName,
+                            "namespace" => $currentModuleNamespace,
+                        ],
+                    ]);
                     \Module::action("module_made", $moduleConfigs['modules'][$currentModuleNamespace]);
                 } else {
-                    $this->error("Download $currentModuleName module failed.");
+                    $this->response([
+                        "status" => "fail",
+                        "message" => "Download $currentModuleName module failed.",
+                        "module" => [
+                            "name" => $currentModuleName,
+                            "namespace" => $currentModuleNamespace,
+                        ],
+                    ]);
                 }
             }
         }

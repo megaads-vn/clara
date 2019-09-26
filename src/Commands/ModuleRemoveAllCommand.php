@@ -32,9 +32,15 @@ class ModuleRemoveAllCommand extends AbtractCommand
             $moduleConfigs['modules'] = [];
             ModuleUtil::setModuleConfig($moduleConfigs);
             system('composer dump-autoload');
-            $this->info("Remove all modules successfully.");            
+            $this->response([
+                "status" => "successful",
+                "message" => "Remove all modules successfully.",
+            ]);
         } else {
-            $this->error("Remove all modules failed. There are not any modules.");
+            $this->response([
+                "status" => "fail",
+                "message" => "Remove all modules failed. There are not any modules.",
+            ]);
         }
     }
 }

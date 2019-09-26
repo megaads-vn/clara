@@ -34,4 +34,14 @@ class AbtractCommand extends Command
     {
         return strtolower(preg_replace('/\B([A-Z])/', '-$1', $name));
     }
+
+    protected function response($data)
+    {
+        $response = json_encode($data);
+        if ($data['status'] == 'successful') {
+            $this->info($response);
+        } else {
+            $this->error($response);
+        }
+    }
 }
