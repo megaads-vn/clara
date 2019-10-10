@@ -27,6 +27,19 @@ function getModuleOption($option = "")
     }
     return $retval;
 }
+function setModuleOption($option = "", $value = "")
+{
+    $retval = null;
+    $module = getCallerModule();
+    $key = $module == null ? $option : $module . '.' . $option;
+    $option = new \Megaads\Clara\Models\Option();
+    $option->key = $key;
+    $option->value = $key;
+    if ($option->save()) {
+        $retval = $option;
+    }
+    return $retval;
+}
 function getAllModuleOptions($module = null)
 {
     $retval = [];

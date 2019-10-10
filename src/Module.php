@@ -38,9 +38,13 @@ class Module extends EventManager
     {
         return getCallerModule();
     }
-    public function option($option = "")
+    public function option($option = "", $value = null)
     {
-        return getModuleOption($option);
+        if ($value == null) {
+            return getModuleOption($option);
+        } else {
+            return setModuleOption($option, $value);
+        }
     }
     public function allOptions($module = null)
     {
