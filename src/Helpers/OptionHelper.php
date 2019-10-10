@@ -34,7 +34,7 @@ function setModuleOption($option = "", $value = "")
     $key = $module == null ? $option : $module . '.' . $option;
     $option = new \Megaads\Clara\Models\Option();
     $option->key = $key;
-    $option->value = $key;
+    $option->value = $value;
     if ($option->save()) {
         $retval = $option;
     }
