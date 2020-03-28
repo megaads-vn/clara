@@ -166,6 +166,11 @@ Module::view('view_name', [params], IS_MULTI_LAYER);
 ```php
 Module::view('view_name', 'This is a view placeholder', IS_MULTI_LAYER);
 ```
+```php
+Module::view('view_name', function() {
+    return 'This is a view placeholder';
+}, IS_MULTI_LAYER);
+```
 
 Using blade statement
 ```php
