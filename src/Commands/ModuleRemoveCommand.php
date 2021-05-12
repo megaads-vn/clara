@@ -28,9 +28,12 @@ class ModuleRemoveCommand extends AbtractCommand
         foreach ($names as $name) {
             $namespace = $this->buildNamespace($name);
             $moduleDir = app_path() . '/Modules/' . $name;
-            if (File::isDirectory($moduleDir)) {
+            if (File::isDirectory($moduleDir)) {                
                 $moduleConfigs = ModuleUtil::getAllModuleConfigs();
-                \Module::action("module_removed", $moduleConfigs['modules'][$namespace]);
+                $moduleConfig = $moduleConfigs['modules'][$namespace];
+                // delete module asset directory
+                ModuleUtil::unlinkModuleAssets($moduleConfig);
+                \Module::action("module_removed", $moduleConfig);
                 File::deleteDirectory($moduleDir);
                 unset($moduleConfigs['modules'][$namespace]);
                 ModuleUtil::setModuleConfig($moduleConfigs);

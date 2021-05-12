@@ -47,4 +47,48 @@ class ModuleUtil
         }
         return $retval;
     }
+
+    public static function linkModuleAssets($moduleConfig = null)
+    {
+        $retval = false;
+        if ($moduleConfig !== null) {
+            // make asset directory
+            $assetDir = public_path() . '/modules';
+            if (!File::isDirectory($assetDir)) {
+                File::makeDirectory($assetDir);
+                $retval = true;
+            }
+            // create tmp link
+            $srcAssetDir = app_path() . '/Modules' . '/' . $moduleConfig['name'] . '/Resources/Assets';
+            if (!File::isDirectory($assetDir . '/tmp')) {
+                File::makeDirectory($assetDir . '/tmp');
+            }
+            // link module assets and remove tmp link
+            if (File::isDirectory($srcAssetDir)) {
+                if (!windows_os()) {
+                    system('ln -s ' . $srcAssetDir . ' ' . $assetDir . '/tmp');
+                } else {
+                    $mode = $this->isDirectory($target) ? 'J' : 'H';
+                    exec("mklink /{$mode} \"{$assetDir}\" \"{$srcAssetDir}\"");
+                }
+                File::move($assetDir . '/tmp/Assets', $assetDir . '/' . $moduleConfig['namespace']);
+                $retval = true;
+            }
+        }
+        return $retval;
+    }
+
+    public static function unlinkModuleAssets($moduleConfig = null)
+    {
+        $retval = false;
+        $assetDir = public_path() . '/modules';
+        if ($moduleConfig !== null) {
+            $assetDir .= '/' . $moduleConfig['namespace'];
+            if (File::exists($assetDir)) {
+                File::delete($assetDir);
+                $retval = true;
+            }
+        }
+        return $retval;
+    }
 }

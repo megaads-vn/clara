@@ -37,6 +37,9 @@ class ModuleDisableCommand extends AbtractCommand
                     ],
                 ]);
             } else {
+                // delete module asset directory
+                ModuleUtil::unlinkModuleAssets($moduleConfigs['modules'][$moduleNamespace]);
+                // set module configs
                 $moduleConfigs['modules'][$moduleNamespace]['status'] = 'disable';
                 ModuleUtil::setModuleConfig($moduleConfigs);
                 $this->response([

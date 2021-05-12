@@ -37,6 +37,9 @@ class ModuleEnableCommand extends AbtractCommand
                     ],
                 ]);
             } else {
+                // link module assets
+                ModuleUtil::linkModuleAssets($moduleConfigs['modules'][$moduleNamespace]);
+                // set module configs
                 $moduleConfigs['modules'][$moduleNamespace]['status'] = 'enable';
                 ModuleUtil::setModuleConfig($moduleConfigs);
                 $this->response([

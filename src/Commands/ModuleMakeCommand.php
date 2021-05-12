@@ -52,12 +52,16 @@ class ModuleMakeCommand extends AbtractCommand
                     $this->replaceInFile($moduleFile->getPathname(), '{{MODULE_NAME}}', $name);
                     $this->replaceInFile($moduleFile->getPathname(), '{{MODULE_NAMESPACE}}', $moduleNamespace);
                 }
-                $moduleConfigs = ModuleUtil::getAllModuleConfigs();
-                $moduleConfigs['modules'][$moduleNamespace] = [
+                $moduleConfig = [
                     'name' => $name,
                     'namespace' => $moduleNamespace,
                     'status' => 'enable',
                 ];
+                // link module assets
+                ModuleUtil::linkModuleAssets($moduleConfig);
+                // set module configs
+                $moduleConfigs = ModuleUtil::getAllModuleConfigs();                
+                $moduleConfigs['modules'][$moduleNamespace] = $moduleConfig;
                 ModuleUtil::setModuleConfig($moduleConfigs);
                 system('composer dump-autoload');
                 $this->response([

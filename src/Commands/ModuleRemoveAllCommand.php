@@ -26,8 +26,14 @@ class ModuleRemoveAllCommand extends AbtractCommand
     {
         $moduleDir = app_path() . '/Modules';
         if (File::isDirectory($moduleDir)) {
-            File::deleteDirectory($moduleDir);
             $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+            // delete assets directory
+            foreach ($moduleConfigs['modules'] as $key => $item) {
+                ModuleUtil::unlinkModuleAssets($item);
+            }
+            // delete module directory
+            File::deleteDirectory($moduleDir);
+            // remove all module configs
             \Module::action("module_removed_all", $moduleConfigs['modules']);
             $moduleConfigs['modules'] = [];
             ModuleUtil::setModuleConfig($moduleConfigs);

@@ -65,12 +65,16 @@ class ModuleDownloadCommand extends AbtractCommand
                     $zipArchive->close();
                     $moduleSpecs = ModuleUtil::getModuleSpecs($currentModuleDir);
                     $currentModuleNamespace = $moduleSpecs['namespace'];
-                    $moduleConfigs = ModuleUtil::getAllModuleConfigs();
-                    $moduleConfigs['modules'][$currentModuleNamespace] = [
+                    $moduleConfig = [
                         'name' => $currentModuleName,
                         'namespace' => $currentModuleNamespace,
                         'status' => 'enable',
                     ];
+                    // link module assets
+                    ModuleUtil::linkModuleAssets($moduleConfig);
+                    // set module configs
+                    $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+                    $moduleConfigs['modules'][$currentModuleNamespace] = $moduleConfig;
                     ModuleUtil::setModuleConfig($moduleConfigs);
                     system('composer dump-autoload');
                     $this->response([
