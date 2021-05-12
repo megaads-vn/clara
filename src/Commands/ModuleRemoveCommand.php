@@ -33,11 +33,14 @@ class ModuleRemoveCommand extends AbtractCommand
                 $moduleConfig = $moduleConfigs['modules'][$namespace];
                 // delete module asset directory
                 ModuleUtil::unlinkModuleAssets($moduleConfig);
+                // rollback module migration
+                ModuleUtil::resetMigration($moduleConfig);
+                // delete module directory
                 \Module::action("module_removed", $moduleConfig);
                 File::deleteDirectory($moduleDir);
                 unset($moduleConfigs['modules'][$namespace]);
                 ModuleUtil::setModuleConfig($moduleConfigs);
-                system('composer dump-autoload');
+                system('composer dump-autoload');                
                 $this->response([
                     "status" => "successful",
                     "message" => "Remove $name module successfully.",

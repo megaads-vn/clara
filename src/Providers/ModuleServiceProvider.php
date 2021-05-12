@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Megaads\Clara\Commands\ModuleDisableCommand;
 use Megaads\Clara\Commands\ModuleDownloadCommand;
+use Megaads\Clara\Commands\ModuleInstallCommand;
 use Megaads\Clara\Commands\ModuleEnableCommand;
 use Megaads\Clara\Commands\ModuleListCommand;
 use Megaads\Clara\Commands\ModuleMakeCommand;
@@ -25,6 +26,7 @@ class ModuleServiceProvider extends ServiceProvider
         ModuleDisableCommand::class,
         ModuleListCommand::class,
         ModuleDownloadCommand::class,
+        ModuleInstallCommand::class,
     ];
     /**
      * Bootstrap the application services.

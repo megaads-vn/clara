@@ -63,7 +63,7 @@ class ModuleMakeCommand extends AbtractCommand
                 $moduleConfigs = ModuleUtil::getAllModuleConfigs();                
                 $moduleConfigs['modules'][$moduleNamespace] = $moduleConfig;
                 ModuleUtil::setModuleConfig($moduleConfigs);
-                system('composer dump-autoload');
+                system('composer dump-autoload');                
                 $this->response([
                     "status" => "successful",
                     "message" => "Make $name module successfully.",

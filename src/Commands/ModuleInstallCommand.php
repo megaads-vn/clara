@@ -6,20 +6,20 @@ use Illuminate\Support\Facades\File;
 use Megaads\Clara\Utils\ModuleUtil;
 use Symfony\Component\Console\Input\InputArgument;
 
-class ModuleDownloadCommand extends AbtractCommand
+class ModuleInstallCommand extends AbtractCommand
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'module:download';
+    protected $name = 'module:install';
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Download a new module.';
+    protected $description = 'Install a module from .zip file';
     /**
      * Get the console command arguments.
      *
@@ -28,7 +28,7 @@ class ModuleDownloadCommand extends AbtractCommand
     public function getArguments()
     {
         return [
-            ['url', InputArgument::IS_ARRAY, 'The urls of modules will be created.'],
+            ['url', InputArgument::IS_ARRAY, 'The urls of modules will be installed.'],
         ];
     }
     /**
@@ -50,14 +50,18 @@ class ModuleDownloadCommand extends AbtractCommand
                 $currentModuleNamespace = $moduleSpecs['namespace'];
                 $this->response([
                     "status" => "fail",
-                    "message" => "Download $currentModuleName module failed. The module's existed.",
+                    "message" => "Install $currentModuleName module failed. The module's existed.",
                     "module" => [
                         "name" => $currentModuleName,
                         "namespace" => $currentModuleNamespace,
                     ],
                 ]);
             } else {
-                file_put_contents($moduleTmpZip, fopen($url, 'r'));
+                if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+                    File::copy($url, $moduleTmpZip);
+                } else {
+                    file_put_contents($moduleTmpZip, fopen($url, 'r'));
+                }
                 $zipArchive = new \ZipArchive();
                 $result = $zipArchive->open($moduleTmpZip);
                 if ($result === true) {
@@ -82,7 +86,7 @@ class ModuleDownloadCommand extends AbtractCommand
                     ModuleUtil::runMigration($moduleConfig);
                     $this->response([
                         "status" => "successful",
-                        "message" => "Download $currentModuleName module successfully.",
+                        "message" => "Install $currentModuleName module successfully.",
                         "module" => [
                             "name" => $currentModuleName,
                             "namespace" => $currentModuleNamespace,
@@ -92,7 +96,7 @@ class ModuleDownloadCommand extends AbtractCommand
                 } else {
                     $this->response([
                         "status" => "fail",
-                        "message" => "Download $currentModuleName module failed.",
+                        "message" => "Install $currentModuleName module failed.",
                         "module" => [
                             "name" => $currentModuleName,
                             "namespace" => $currentModuleNamespace,

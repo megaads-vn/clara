@@ -91,4 +91,26 @@ class ModuleUtil
         }
         return $retval;
     }
+
+    public static function runMigration($moduleConfig = null) {
+        $retval = false;
+        if ($moduleConfig !== null) {
+            \Artisan::call('migrate', [
+                '--path' => 'app/Modules/' . $moduleConfig['name'] . '/Migrations/'
+            ]);
+            $retval = true;
+        }
+        return $retval;
+    }
+
+    public static function resetMigration($moduleConfig = null) {
+        $retval = false;
+        if ($moduleConfig !== null) {
+            \Artisan::call('migrate:reset', [
+                '--path' => 'app/Modules/' . $moduleConfig['name'] . '/Migrations/'
+            ]);
+            $retval = true;
+        }        
+        return $retval;
+    }
 }
