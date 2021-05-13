@@ -15,6 +15,7 @@ class EventManager
      *
      */
     protected $view;
+
     protected $hookIdx = [];
 
     /**
@@ -174,5 +175,15 @@ class EventManager
             $args[0]['view_idx'] = $this->hookIdx[$hook];
         }
         return $this->view->fire($hook, $args, $isMultiLayer);
+    }
+
+    /**
+     * Response an asset url.
+     * 
+     * @return String
+     */
+    public function asset($assetPath)
+    {        
+        return  '/modules/' . $assetPath;
     }
 }

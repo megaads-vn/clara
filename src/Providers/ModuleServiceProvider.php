@@ -35,13 +35,17 @@ class ModuleServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Adds a directive in Blade for actions
+        // Add a directive in Blade for actions
         Blade::directive('action', function ($expression) {
             return "<?php Module::action({$expression}); ?>";
         });
-        // Adds a directive in Blade for views
+        // Add a directive in Blade for views
         Blade::directive('view', function ($expression) {
             return "<?php echo Module::view({$expression}); ?>";
+        });
+        // Add a directive in Blade for assets
+        Blade::directive('asset', function ($expression) {
+            return "<?php echo Module::asset({$expression}); ?>";
         });
         // Load enabled modules
         $moduleDir = app_path() . '/Modules/';

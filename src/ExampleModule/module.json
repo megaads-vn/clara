@@ -3,6 +3,11 @@
     "namespace": "{{MODULE_NAMESPACE}}",
     "description": "",
     "type": "module",
+    "homepage": "",
+    "repository": {
+        "type": "git",
+        "url": ""
+      },
     "autoload": {
         "files": [
             "Helpers/helper.php"
