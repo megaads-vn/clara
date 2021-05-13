@@ -93,10 +93,10 @@ app
 - module.json: the module configuration file is based on composer composer.json. All configurations in the module.json will be merged to main composer.json.
 - start.php: the module's start file that will be loaded every requests. So module actions, module views... can be registered in this file.
 
-### Download and install module from an URL
+### Install module from a file or an URL
 
 ```
-php artisan module:download <ZipFileURL> ...
+php artisan module:install <ZipFilePath> <ZipFileURL> ...
 ```
 
 ### Enable module
@@ -188,7 +188,21 @@ Handle a view using a controller
 Module::onView('view_name', 'Modules\Example\Controllers\HomeController@index', PRIORITY);
 ```
 
-## Module Methods
+## Module Assets
+
+Clara will create a symbol link from module asset directory `app/Modules/{ModuleName}/Resources/Assets` to `public/modules/{ModuleNamespace}`
+### Include a module asset
+Using PHP
+```php
+<script type="text/javascript" src="<?= Module::asset('{module-namespace}/js/demo.js') ?>"></script>
+```
+
+Using blade statement
+```php
+<script type="text/javascript" src="@asset('{module-namespace}/js/demo.js')"></script>
+```
+
+## Module Utility Methods
 
 ### Get all modules
 ```php
@@ -214,8 +228,8 @@ $option = Module::option('option.name', 'option.value');
 
 The Clara is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
 
-## Contact us/ Instant feedback
+## Contact us / Instant feedback
 
-Email: info@megaads.vn
+Email: info@megaads.vn | phult.contact@gmail.com
 
 If you find a bug, please report it [here on Github](https://github.com/megaads-vn/clara/issues)
