@@ -3,6 +3,8 @@
     "namespace": "{{MODULE_NAMESPACE}}",
     "description": "",
     "type": "module",
+    "author_name":"",
+    "author_email": "",
     "homepage": "",
     "repository": {
         "type": "git",
