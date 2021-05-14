@@ -40,6 +40,11 @@ By default the module classes are not loaded automatically. You can autoload you
     }
 }
 ```
+5. Publish file config: 
+For submit module functional to app store must be config app store url. To generate clara configuration file: 
+```
+php artisan vendor:publish --provider="Megaads\Clara\Providers\ModuleServiceProvider"
+```
 ## Module Management
 
 ### Create module
