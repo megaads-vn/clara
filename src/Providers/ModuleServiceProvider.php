@@ -13,6 +13,7 @@ use Megaads\Clara\Commands\ModuleMakeCommand;
 use Megaads\Clara\Commands\ModuleRemoveAllCommand;
 use Megaads\Clara\Commands\ModuleRemoveCommand;
 use Megaads\Clara\Commands\ModuleAssetLinkCommand;
+use Megaads\Clara\Commands\ModuleSubmitCommand;
 use Megaads\Clara\Module;
 use Megaads\Clara\Utils\ModuleUtil;
 
@@ -29,6 +30,7 @@ class ModuleServiceProvider extends ServiceProvider
         ModuleDownloadCommand::class,
         ModuleInstallCommand::class,
         ModuleAssetLinkCommand::class,
+        ModuleSubmitCommand::class,
     ];
     /**
      * Bootstrap the application services.
@@ -82,6 +84,8 @@ class ModuleServiceProvider extends ServiceProvider
                 \Module::action("module_loaded", $moduleConfig);
             }
         }
+
+        $this->publishConfig();
     }
     private function loadKernel($module)
     {
@@ -142,5 +146,23 @@ class ModuleServiceProvider extends ServiceProvider
     {
         $provides = $this->commands;
         return $provides;
+    }
+    /**
+     * @return null
+     */
+    private function publishConfig()
+    {
+        if (function_exists('config_path')) {
+            $path = $this->getConfigPath();
+            $this->publishes([$path => config_path('clara.php')], 'config');
+        }
+    }
+
+    /**
+     * @return string
+     */
+    private function getConfigPath()
+    {
+        return __DIR__.'/../Config/clara.php';
     }
 }
