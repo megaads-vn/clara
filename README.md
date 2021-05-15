@@ -201,7 +201,10 @@ Using blade statement
 ```php
 <script type="text/javascript" src="@asset('{module-namespace}/js/demo.js')"></script>
 ```
-
+### Create module asset link manually
+```
+php artisan module:asset:link <ModuleName> ...
+```
 ## Module Utility Methods
 
 ### Get all modules
