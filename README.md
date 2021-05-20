@@ -55,8 +55,13 @@ php artisan vendor:publish --provider="Megaads\Clara\Providers\ModuleServiceProv
 ```
 php artisan module:make <ModuleName> ...
 ```
+#### Naming conventions
 
-Folder structure
+Module names should follow `UpperCamelCase` syntax (without any space characters). For example: `FacebookComment`
+
+and module namespace in `kebab-case` that correspond to a module name in `CamelCase`. For example: `facebook-comment`
+
+#### Folder structure
 
 ```
 app
@@ -98,28 +103,28 @@ app
         │
         └───start.php
 ```
-- module.json: the module configuration file is based on composer composer.json. All properties in the module.json will be merged to main composer.json.
-- start.php: the module's start file that will be loaded every requests. So module actions, module views... can be registered in this file.
+- `module.json`: the module configuration file is based on `composer.json` form. All properties in the `module.json` will be merged to `composer.json` of the project.
+- `start.php`: the module's start file that will be loaded every requests. So module actions, module views... can be registered in this file.
 
 ### Install module from a file or an URL
 
 ```
-php artisan module:install <ZipFilePath> <ZipFileURL> ...
+php artisan module:install <ModuleZipFilePath> <ModuleZipFileURL> ...
 ```
 
-### Enable module
+### Enable a module
 
 ```
 php artisan module:enable <ModuleName> ...
 ```
 
-### Disable module
+### Disable a module
 
 ```
 php artisan module:disable <ModuleName> ...
 ```
 
-### Remove module
+### Remove a module
 
 ```
 php artisan module:remove <ModuleName> ...
