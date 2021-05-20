@@ -67,11 +67,11 @@ class ModuleUtil
             if (File::isDirectory($srcAssetDir)) {
                 if (!windows_os()) {
                     system('ln -s ' . $srcAssetDir . ' ' . $assetDir . '/tmp');
+                    File::move($assetDir . '/tmp/Assets', $assetDir . '/' . $moduleConfig['namespace']);
                 } else {
-                    $mode = $this->isDirectory($target) ? 'J' : 'H';
-                    exec("mklink /{$mode} \"{$assetDir}\" \"{$srcAssetDir}\"");
+                    $assetDir .= '/' . $moduleConfig['namespace'];
+                    exec("mklink /J \"{$assetDir}\" \"{$srcAssetDir}\"");
                 }
-                File::move($assetDir . '/tmp/Assets', $assetDir . '/' . $moduleConfig['namespace']);
                 $retval = true;
             }
         }
