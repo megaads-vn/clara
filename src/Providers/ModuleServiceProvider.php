@@ -117,13 +117,12 @@ class ModuleServiceProvider extends ServiceProvider
         foreach ($files as $file) {
             $config = $this->app['files']->getRequire($file);
             $name = $this->app['files']->name($file);
-            // special case for files named config.php (config keyword is omitted)
-            // if ($name === 'config') {
-            foreach ($config as $key => $value) {
-                $this->app['config']->set($moduleNamespace . $key, $value);
+            if (is_array($config)) {
+                foreach ($config as $key => $value) {
+                    $this->app['config']->set($moduleNamespace . $key, $value);
+                }
+                $this->app['config']->set($moduleNamespace . $name, $config);
             }
-            // }
-            $this->app['config']->set($moduleNamespace . $name, $config);
         }
     }
     /**

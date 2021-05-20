@@ -22,7 +22,7 @@ Clara is packed as a composer package. So it can be installed quickly:
 
 4. Autoloading
 
-By default the module classes are not loaded automatically. You can autoload your modules in composer.json
+By default, Module classes are not loaded automatically. You can autoload your modules in composer.json
 ```json
 {
     "autoload": {
@@ -41,12 +41,13 @@ By default the module classes are not loaded automatically. You can autoload you
 }
 ```
 
-5. Publish file config
+5. Publish Clara configurations
 
-With the module submit function, must have url configuration of store. To generate clara configuration file:
+To override Clara default configuration options, you will need to publish Clara configuration file to the application's config directory.
 ```
 php artisan vendor:publish --provider="Megaads\Clara\Providers\ModuleServiceProvider"
 ```
+
 ## Module Management
 
 ### Create module
@@ -97,7 +98,7 @@ app
         │
         └───start.php
 ```
-- module.json: the module configuration file is based on composer composer.json. All configurations in the module.json will be merged to main composer.json.
+- module.json: the module configuration file is based on composer composer.json. All properties in the module.json will be merged to main composer.json.
 - start.php: the module's start file that will be loaded every requests. So module actions, module views... can be registered in this file.
 
 ### Install module from a file or an URL
@@ -187,17 +188,17 @@ Using blade statement
 ### Handle a view
 ```php
 Module::onView('view_name', function ($params) {  
-    return view('module-namespace:home.index');
+    return view('{module-namespace}:home.index');
 }, PRIORITY);
 ```
 Handle a view using a controller
 ```php
-Module::onView('view_name', 'Modules\Example\Controllers\HomeController@index', PRIORITY);
+Module::onView('view_name', 'Modules\ExampleModule\Controllers\HomeController@index', PRIORITY);
 ```
 
 ## Module Assets
 
-Clara will create a symbol link from module asset directory `app/Modules/{ModuleName}/Resources/Assets` to `public/modules/{ModuleNamespace}`
+Clara will create a symbol link from module asset directory `app/Modules/{ModuleName}/Resources/Assets` to `public/modules/{module-namespace}`
 ### Include a module asset
 Using PHP
 ```php
@@ -212,6 +213,16 @@ Using blade statement
 ```
 php artisan module:asset:link <ModuleName> ...
 ```
+## Module Configurations
+
+All of the configuration files for the module are stored in the `{ModuleName}/Config` directory
+
+### Accessing Configuration Values
+Sometimes you may need to access configuration values at run-time. You may do so using the `Config` class
+```
+Config::get('{module-namespace}::app.message', 'hello world');
+```
+
 ## Module Utility Methods
 
 ### Get all modules
