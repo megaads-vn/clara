@@ -9,6 +9,7 @@ class EventManager
      *
      */
     protected $action;
+    protected $variable;
 
     /**
      * Holds all registered views.
@@ -25,6 +26,7 @@ class EventManager
     {
         $this->action = new Action();
         $this->view = new View();
+        $this->variable = new Variable();
     }
 
     /**
@@ -45,6 +47,16 @@ class EventManager
     public function getView()
     {
         return $this->view;
+    }
+
+    /**
+     * Get the variable instance._
+     * 
+     * @return Megaads\Clara\Event\Variable
+     */
+    public function getVariable()
+    {
+        return $this->variable;
     }
 
     /**
@@ -175,6 +187,57 @@ class EventManager
             $args[0]['view_idx'] = $this->hookIdx[$hook];
         }
         return $this->view->fire($hook, $args, $isMultiLayer);
+    }
+
+    /**
+     * Add an variable listener.
+     *
+     * @param string $hook      Hook name
+     * @param mixed  $callback  Function to execute
+     * @param int    $priority  Priority of the variable
+     * @param int    $arguments Number of arguments to accept
+     */
+    public function onVariable($hook, $callback, $priority = 20, $arguments = 1)
+    {
+        $this->variable->listen($hook, $callback, $priority, $arguments);
+    }
+
+    /**
+     * Remove an variable.
+     *
+     * @param string $hook     Hook name
+     * @param mixed  $callback Function to execute
+     * @param int    $priority Priority of the variable
+     */
+    public function removeVariable($hook, $callback, $priority = 20)
+    {
+        $this->variable->remove($hook, $callback, $priority);
+    }
+
+    /**
+     * Remove all variables.
+     *
+     * @param string $hook Hook name
+     */
+    public function removeAllVariables($hook = null)
+    {
+        $this->variable->removeAll($hook);
+    }
+
+    public function variable() {
+        $args = func_get_args();
+        $num = func_num_args();
+        $hook = $args[0];
+        unset($args[0]);
+        $default = $args[1];
+        $args = array_values($args);
+        $result = $this->variable->fire($hook, $args);
+
+        if ($result['status'] == 'successful') {
+            return $result['result'];
+        } else {
+            return $default;
+        }
     }
 
     /**

@@ -51,6 +51,17 @@ class ModuleServiceProvider extends ServiceProvider
         Blade::directive('asset', function ($expression) {
             return "<?php echo Module::asset({$expression}); ?>";
         });
+        // Add Directive Blade for variable
+        Blade::directive('variable', function ($expression) {
+            $expression = str_replace(', ', ',', $expression);
+            $pos = strpos($expression, ',');
+            if ($pos >= 0) {
+                $variable = substr($expression, 0, $pos);
+                $variable = preg_replace("/[\"']+/", '', $variable);
+                $params = substr($expression, $pos + 1);
+                return "<?php \${$variable} = Module::variable({$params}); ?>";
+            }
+        });
         // Load enabled modules
         $moduleDir = app_path() . '/Modules/';
         if (is_dir($moduleDir)) {
