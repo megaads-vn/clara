@@ -27,7 +27,7 @@ class ModuleEnableCommand extends AbtractCommand
         foreach ($names as $name) {
             $moduleNamespace = $this->buildNamespace($name);
             $moduleConfigs = ModuleUtil::getAllModuleConfigs();
-            if ($moduleConfigs['modules'][$moduleNamespace] == null) {
+            if (!array_key_exists($moduleNamespace, $moduleConfigs['modules']) || $moduleConfigs['modules'][$moduleNamespace] == null) {
                 $this->response([
                     "status" => "fail",
                     "message" => "Enable $name module failed. The module's existed.",

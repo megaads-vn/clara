@@ -2,9 +2,7 @@
 namespace Megaads\Clara\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Megaads\Clara\Utils\ModuleUtil;
-use Symfony\Component\Console\Input\InputArgument;
 
 class ModuleAssetLinkCommand extends AbtractCommand
 {
@@ -13,7 +11,9 @@ class ModuleAssetLinkCommand extends AbtractCommand
      *
      * @var string
      */
-    protected $name = 'module:asset:link';
+    protected $signature = 'module:asset:link
+        {name=n/a : The names of modules will be linked.}
+        {--all=false : Create asset link to all modules.}';
     /**
      * The console command description.
      *
@@ -21,46 +21,52 @@ class ModuleAssetLinkCommand extends AbtractCommand
      */
     protected $description = 'Create module asset link';
     /**
-     * Get the console command arguments.
-     *
-     * @return array
-     */
-    public function getArguments()
-    {
-        return [
-            ['name', InputArgument::IS_ARRAY, 'The names of modules will be linked.'],
-        ];
-    }
-    /**
      * Execute the console command.
      */
     public function handle()
     {
-        $names = $this->argument('name');
-        foreach ($names as $name) {
-            $moduleNamespace = $this->buildNamespace($name);
+        $name = $this->argument('name');
+        $isAll = $this->option('all');
+        if ($name != null && $name !== 'n/a') {
+            $this->link($name);
+        } else if ($isAll === null) {
             $moduleConfigs = ModuleUtil::getAllModuleConfigs();
-            if ($moduleConfigs['modules'][$moduleNamespace] == null) {
-                $this->response([
-                    "status" => "fail",
-                    "message" => "Link $name module asset failed. The module's not existed.",
-                    "module" => [
-                        "name" => $name,
-                        "namespace" => $moduleNamespace,
-                    ],
-                ]);
-            } else {
-                // link module assets
-                ModuleUtil::linkModuleAssets($moduleConfigs['modules'][$moduleNamespace]);                
-                $this->response([
-                    "status" => "successful",
-                    "message" => "$name module assets linked successfully.",
-                    "module" => [
-                        "name" => $name,
-                        "namespace" => $moduleNamespace,
-                    ],
-                ]);
+            foreach ($moduleConfigs['modules'] as $moduleNamespace => $moduleConfig) {
+                if ($moduleConfig['status'] != 'disable') {
+                    $this->link($moduleConfig['name']);
+                }
             }
+        }
+    }
+    private function link($moduleName)
+    {
+        $moduleNamespace = $this->buildNamespace($moduleName);
+        $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+        $failMessage = [
+            "status" => "fail",
+            "message" => "Link $moduleName module asset failed. The module's not existed or disabled.",
+            "module" => [
+                "name" => $moduleName,
+                "namespace" => $moduleNamespace,
+            ],
+        ];
+        if (!array_key_exists($moduleNamespace, $moduleConfigs['modules']) || $moduleConfigs['modules'][$moduleNamespace] == null) {
+            $failMessage['message'] = "Link $moduleName module asset failed. The module's not existed.";
+            $this->response($failMessage);
+        } else if ($moduleConfigs['modules'][$moduleNamespace] !== null && $moduleConfigs['modules'][$moduleNamespace]['status'] == 'disable') {
+            $failMessage['message'] = "Link $moduleName module asset failed. The module's disabled.";
+            $this->response($failMessage);
+        } else {
+            // link module assets
+            ModuleUtil::linkModuleAssets($moduleConfigs['modules'][$moduleNamespace]);
+            $this->response([
+                "status" => "successful",
+                "message" => "$moduleName module assets linked successfully.",
+                "module" => [
+                    "name" => $moduleName,
+                    "namespace" => $moduleNamespace,
+                ],
+            ]);
         }
     }
 }

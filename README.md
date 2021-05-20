@@ -198,7 +198,7 @@ Module::onView('view_name', 'Modules\ExampleModule\Controllers\HomeController@in
 
 ## Module Assets
 
-Clara will create a symbol link from module asset directory `app/Modules/{ModuleName}/Resources/Assets` to `public/modules/{module-namespace}`
+Clara will create a symbol link from module asset directory `app/Modules/{ModuleName}/Resources/Assets` to `public/modules/{module-namespace}` while a module was installed, made or enabled.
 ### Include a module asset
 Using PHP
 ```php
@@ -211,7 +211,11 @@ Using blade statement
 ```
 ### Create module asset link manually
 ```
-php artisan module:asset:link <ModuleName> ...
+php artisan module:asset:link <ModuleName>
+```
+### Create module asset link manually for all activated modules
+```
+php artisan module:asset:link --all
 ```
 ## Module Configurations
 
