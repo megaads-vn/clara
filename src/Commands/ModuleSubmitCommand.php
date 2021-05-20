@@ -12,8 +12,7 @@ class ModuleSubmitCommand extends AbtractCommand
      *
      * @var string
      */
-    protected $signature = 'module:submit 
-                            {--module= : [string] Module name}';
+    protected $name = 'module:submit';
     /**
      * The console command description.
      *
@@ -30,11 +29,11 @@ class ModuleSubmitCommand extends AbtractCommand
      * Execute the console command.
      */
     public function handle() {
-        $options = $this->options();
-        $moduleName = $options['module'];
-        if (!$moduleName) {
-            $moduleName = $this->ask("What's name of module want to submit?");
+        $moduleName = $this->argument("name");
+        if (!isset($moduleName[0])) {
+            return $this->error('Module name is require.');
         }
+        $moduleName = $moduleName[0];
         $modulePath = app_path('Modules/' . $moduleName);
         $moduleJson = $modulePath . '/module.json';
         $moduleData = NULL;
