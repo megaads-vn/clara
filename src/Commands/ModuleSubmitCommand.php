@@ -81,7 +81,9 @@ class ModuleSubmitCommand extends AbtractCommand
 
         if (isset($moduleInfo->name)) {
             $retval['name'] = $moduleInfo->name;
-            $retval['name_space'] = $this->formatModuleFolderName($moduleInfo->name, false);
+        }
+        if (isset($moduleInfo->namespace)) {
+            $retval['name_space'] = $moduleInfo->namespace;
         }
         if (isset($moduleInfo->image_url)) {
             $retval['image_url'] = $moduleInfo->image_url;
