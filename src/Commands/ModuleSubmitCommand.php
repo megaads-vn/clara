@@ -35,7 +35,7 @@ class ModuleSubmitCommand extends AbtractCommand
         if (!$moduleName) {
             $moduleName = $this->ask("What's name of module want to submit?");
         }
-        $modulePath = __DIR__.'/../../../../../app/Modules/' . $moduleName;
+        $modulePath = app_path('Modules/' . $moduleName);
         $moduleJson = $modulePath . '/module.json';
         $moduleData = NULL;
         $submitRs = NULL;
@@ -43,11 +43,13 @@ class ModuleSubmitCommand extends AbtractCommand
             $jsonContent = file_get_contents($moduleJson);
             $jsonContent = json_decode($jsonContent);
             $moduleData = $this->prepareModuleInfo($jsonContent);
-            $zippedFile = $this->compressDirectory($moduleData['name_space'], $modulePath);
-            $moduleData['package_url'] = $this->uploadModule($moduleData['name_space'], $zippedFile);
+            $zippedFile = $this->compressDirectory($moduleData['name'], $modulePath);
+            $moduleData['package_url'] = $this->uploadModule($moduleData['name'], $zippedFile);
             if (!empty($moduleData['package_url'])) {
                 $submitRs = $this->saveOrUpdateModule($moduleData);
             }
+        } else {
+            return $this->error("File module.json does not exists. Please check again!");
         }
         if (isset($submitRs->status) && $submitRs->status == 'successfull') {
             $this->info("Module $moduleName was submited successfully.");
@@ -57,7 +59,7 @@ class ModuleSubmitCommand extends AbtractCommand
             if (isset($submitRs->message)) {
                 $msg = $submitRs->message;
             }
-            $this->error("Has something wrong when submit module $moduleName. \n $msg");
+            return $this->error("Has something wrong when submit module $moduleName. \n $msg");
         }
     }
 
@@ -298,8 +300,7 @@ class ModuleSubmitCommand extends AbtractCommand
         $result = NULL;
         $url = config('clara.app_store_url', '');
         if (empty($url)) {
-            $this->error("Please provide app_store_url on configuration file.");
-            return NULL;
+            return $this->error("Please provide app_store_url on configuration file.");
         }
         $fullUploadUrl = $url . 'module/upload';
         $headers = ["Content-Type:multipart/form-data"];
