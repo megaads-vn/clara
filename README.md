@@ -114,7 +114,7 @@ app
 php artisan module:install <ModuleName>
 ```
 
-Clara takes the name of the module that requested to searches for it in the app repository that you have registered in `config/clara.php` configuration, after downloading the module files, Clara adds the module configuration to the `module.json` file
+Clara takes the name of the module that requested to search for it in the app repository that you have registered in `config/clara.php` configuration, after downloading the module files, Clara adds the module configuration to the `module.json` file
 
 
 #### Install module list from `module.json`
