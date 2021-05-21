@@ -106,7 +106,26 @@ app
 - `module.json`: the module configuration file is based on `composer.json` form. All properties in the `module.json` will be merged to `composer.json` of the project.
 - `start.php`: the module's start file that will be loaded every requests. So module actions, module views... can be registered in this file.
 
-### Install module from a file or an URL
+### Module installing
+
+#### Install a module using the module name
+
+```
+php artisan module:install <ModuleName>
+```
+
+Clara takes the name of the module that requested to searches for it in the app repository that you have registered in `config/clara.php` configuration, after downloading the module files, Clara adds the module configuration to the `module.json` file
+
+
+#### Install module list from `module.json`
+
+```
+php artisan module:install
+```
+
+This will searches and downloads the modules listed in `module.json` from the app repository into the `app/Modules/` directory
+
+#### Install a module from a zip file or an URL
 
 ```
 php artisan module:install <ModuleZipFilePath> <ModuleZipFileURL> ...
