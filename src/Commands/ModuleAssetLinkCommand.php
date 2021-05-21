@@ -7,7 +7,7 @@ use Megaads\Clara\Utils\ModuleUtil;
 class ModuleAssetLinkCommand extends AbtractCommand
 {
     /**
-     * The console command name.
+     * The console command signature.
      *
      * @var string
      */
