@@ -50,7 +50,7 @@ class View extends AbtractEvent
         if (is_string($fn) && strpos($fn, '@')) {
             $retval = \App::call($fn, $parameters);
         } else {
-            $retval = call_user_func_array($this->getFunction($listener['callback']), $parameters);
+            $retval = call_user_func_array($fn, $parameters);
         }
         return $retval;
     }
