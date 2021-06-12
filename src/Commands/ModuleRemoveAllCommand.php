@@ -37,7 +37,7 @@ class ModuleRemoveAllCommand extends AbtractCommand
             File::deleteDirectory($moduleDir);
             // remove all module configs
             \Module::action("module_removed_all", $moduleConfigs['modules']);
-            $moduleConfigs['modules'] = [];
+            $moduleConfigs['modules'] = json_decode("{}");
             ModuleUtil::setModuleConfig($moduleConfigs);
             system('composer dump-autoload');
             $this->response([

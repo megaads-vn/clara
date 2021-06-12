@@ -22,7 +22,12 @@ class Action extends AbtractEvent
                         $parameters[] = $args[$i];
                     }
                 }
-                call_user_func_array($this->getFunction($listener['callback']), $parameters);
+                $fn = $this->getFunction($listener['callback']);
+                if (is_string($fn) && strpos($fn, '@')) {
+                    \App::call($fn, $parameters);
+                } else {
+                    call_user_func_array($fn, $parameters);
+                }
             });
         }
     }
