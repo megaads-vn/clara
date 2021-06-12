@@ -105,6 +105,9 @@ class ModuleSubmitCommand extends AbtractCommand
         if (isset($moduleInfo->repository)) {
             $retval['repository'] = $moduleInfo->repository;
         }
+        if (isset($moduleInfo->homepage)) {
+            $retval['homepage'] = $moduleInfo->homepage;
+        }
         return $retval;
     }
 

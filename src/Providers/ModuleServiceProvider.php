@@ -110,7 +110,7 @@ class ModuleServiceProvider extends ServiceProvider
         if (!$this->app->routesAreCached()) {
             $routeFiles = $this->app['files']->files($routeDir);
             foreach ($routeFiles as $file) {
-                \Route::prefix('')
+                \Route::prefix('{locale?}')
                     ->namespace('Modules\\' . $module . '\\Controllers')
                     ->group($file);
                 // foreach ($route_files as $route_file) {
