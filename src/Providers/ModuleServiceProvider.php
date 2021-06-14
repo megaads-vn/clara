@@ -108,9 +108,14 @@ class ModuleServiceProvider extends ServiceProvider
     private function loadRoutes($routeDir, $module)
     {
         if (!$this->app->routesAreCached()) {
+            $locale = '';
+            $isLocalization = env('LOCALIZATION', false);
+            if ($isLocalization) {
+                $locale = '{locale?}';
+            }
             $routeFiles = $this->app['files']->files($routeDir);
             foreach ($routeFiles as $file) {
-                \Route::prefix('')
+                \Route::prefix($locale)
                     ->namespace('Modules\\' . $module . '\\Controllers')
                     ->group($file);
                 // foreach ($route_files as $route_file) {
