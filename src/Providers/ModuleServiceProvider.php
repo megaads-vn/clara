@@ -110,7 +110,8 @@ class ModuleServiceProvider extends ServiceProvider
         if (!$this->app->routesAreCached()) {
             $locale = '';
             $isLocalization = env('LOCALIZATION', false);
-            if ($isLocalization) {
+            $appLang = env('APP_LOCALE', '');
+            if ($isLocalization && $appLang !== '') {
                 $locale = '{locale?}';
             }
             $routeFiles = $this->app['files']->files($routeDir);
