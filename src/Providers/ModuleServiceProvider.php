@@ -80,10 +80,10 @@ class ModuleServiceProvider extends ServiceProvider
                 if ($this->files->exists($currentModuleDir . '/Kernel.php')) {
                     $this->loadKernel($module);
                 }
-                $routeDir = $currentModuleDir . '/Routes';
-                if ($this->files->isDirectory($routeDir)) {
-                    $this->loadRoutes($routeDir, $module);
-                }
+                // $routeDir = $currentModuleDir . '/Routes';
+                // if ($this->files->isDirectory($routeDir)) {
+                //     $this->loadRoutes($routeDir, $module);
+                // }
                 $configDir = $currentModuleDir . '/Config';
                 if ($this->files->isDirectory($configDir)) {
                     $this->loadConfig($configDir, $moduleNamespace);
@@ -95,7 +95,7 @@ class ModuleServiceProvider extends ServiceProvider
                 \Module::action("module_loaded", $moduleConfig);
             }
         }
-
+        $this->app->register('Megaads\Clara\Providers\ModuleRouteServiceProvider');
         $this->publishConfig();
     }
     private function loadKernel($module)
@@ -114,11 +114,27 @@ class ModuleServiceProvider extends ServiceProvider
             if ($isLocalization && $appLang !== '') {
                 $locale = '{locale?}';
             }
+            $ignoreRouteNamespace = [];
+            $moduleJsonFile = app_path() . '/Modules/' . $module . '/module.json';
+            // if ($module == "Localization") {
+                if (file_exists($moduleJsonFile)) {
+                    $moduleContent = json_decode(file_get_contents($moduleJsonFile));
+                    if (isset($moduleContent->routes)) {
+                        foreach ($moduleContent->routes as $item)
+                        $ignoreRouteNamespace[$item->name] = $item->namespace;
+                    }
+                }
+            // }
             $routeFiles = $this->app['files']->files($routeDir);
             foreach ($routeFiles as $file) {
-                \Route::prefix($locale)
-                    ->namespace('Modules\\' . $module . '\\Controllers')
-                    ->group($file);
+               $route = \Route::prefix($locale);
+               $fileName = $this->getFileName($file);
+               if (isset($ignoreRouteNamespace[$fileName])) {
+                   $route->namespace($ignoreRouteNamespace[$fileName]);
+               } else {
+                   $route->namespace('Modules\\' . $module . '\\Controllers');
+               }
+                $route->group($file);
                 // foreach ($route_files as $route_file) {
                 //     if ($this->files->exists($route_file)) {
                 //         include $file;
@@ -127,6 +143,7 @@ class ModuleServiceProvider extends ServiceProvider
             }
         }
     }
+
     private function loadConfig($configDir, $moduleNamespace = null)
     {
         $files = $this->app['files']->files($configDir);
@@ -180,5 +197,15 @@ class ModuleServiceProvider extends ServiceProvider
     private function getConfigPath()
     {
         return __DIR__.'/../Config/clara.php';
+    }
+
+    /**
+     * @return string
+     */
+    private function getFileName($filePath) {
+        $file = '';
+        $file = explode('/', $filePath);
+        $file = end($file);
+        return str_replace('.php', '', $file);
     }
 }
