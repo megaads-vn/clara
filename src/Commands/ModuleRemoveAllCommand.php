@@ -39,7 +39,7 @@ class ModuleRemoveAllCommand extends AbtractCommand
             \Module::action("module_removed_all", $moduleConfigs['modules']);
             $moduleConfigs['modules'] = json_decode("{}");
             ModuleUtil::setModuleConfig($moduleConfigs);
-            system('composer dump-autoload');
+            system('composer update');
             $this->response([
                 "status" => "successful",
                 "message" => "Remove all modules successfully.",

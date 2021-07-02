@@ -40,7 +40,7 @@ class ModuleRemoveCommand extends AbtractCommand
                 File::deleteDirectory($moduleDir);
                 unset($moduleConfigs['modules'][$namespace]);
                 ModuleUtil::setModuleConfig($moduleConfigs);
-                system('composer dump-autoload');                
+                system('composer update');                
                 $this->response([
                     "status" => "successful",
                     "message" => "Remove $name module successfully.",

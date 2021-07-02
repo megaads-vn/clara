@@ -104,7 +104,7 @@ class ModuleInstallCommand extends AbtractCommand
             $moduleConfigs = ModuleUtil::getAllModuleConfigs();
             $moduleConfigs['modules'][$currentModuleNamespace] = $moduleConfig;
             ModuleUtil::setModuleConfig($moduleConfigs);
-            system('composer dump-autoload');
+            system('composer update');
             // migrate module
             ModuleUtil::runMigration($moduleConfig);
             $this->response([

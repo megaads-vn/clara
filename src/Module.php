@@ -15,6 +15,22 @@ class Module extends EventManager
         $moduleConfigs = ModuleUtil::getAllModuleConfigs();
         return $moduleConfigs['modules'];
     }
+
+    /**
+     * Check if the module is active.
+     */
+    public function isActive($moduleName)
+    {
+        $retval = false;
+        $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+        foreach ($moduleConfigs['modules'] as $item) {
+            if ($item['name'] === $moduleName && $item['status'] === "enable") {
+                $retval = true;
+                break;
+            }
+        }
+        return $retval;
+    }
     /**
      * Get the current module detail.
      */
