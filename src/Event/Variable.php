@@ -19,11 +19,11 @@ class Variable extends AbtractEvent
     public function fire($action, $args)
     {
         if ($this->getListeners()) {
-            $this->getListeners()->where('hook', $action)->each(function ($listener) use ($action, $args) {
+            $this->getListeners()->where('hook', $action)->each(function ($listener) use ($action, &$args) {
                 $parameters = [];
                 for ($i = 0; $i < $listener['arguments']; $i++) {
                     if (isset($args[$i])) {
-                        $parameters[] = $args[$i];
+                        $parameters[] = &$args[$i];
                     }
                 }
                 $this->retVal['status'] = 'successful';
