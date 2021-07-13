@@ -80,10 +80,10 @@ class ModuleServiceProvider extends ServiceProvider
                 if ($this->files->exists($currentModuleDir . '/Kernel.php')) {
                     $this->loadKernel($module);
                 }
-                // $routeDir = $currentModuleDir . '/Routes';
-                // if ($this->files->isDirectory($routeDir)) {
-                //     $this->loadRoutes($routeDir, $module);
-                // }
+                $routeDir = $currentModuleDir . '/Routes';
+                if ($this->files->isDirectory($routeDir)) {
+                    $this->loadRoutes($routeDir, $module);
+                }
                 $configDir = $currentModuleDir . '/Config';
                 if ($this->files->isDirectory($configDir)) {
                     $this->loadConfig($configDir, $moduleNamespace);
@@ -95,7 +95,6 @@ class ModuleServiceProvider extends ServiceProvider
                 \Module::action("module_loaded", $moduleConfig);
             }
         }
-        $this->app->register('Megaads\Clara\Providers\ModuleRouteServiceProvider');
         $this->publishConfig();
     }
     private function loadKernel($module)
