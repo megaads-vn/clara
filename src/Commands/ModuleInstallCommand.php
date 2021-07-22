@@ -51,10 +51,24 @@ class ModuleInstallCommand extends AbtractCommand
             switch ($moduleType) {
                 case self::TYPE_NAME:
                     {
+                        $moduleVersion = $this->getModuleVersion($module);
                         $moduleNamespace = $this->buildNamespace($module);
                         $moduleConfigs = ModuleUtil::getAllModuleConfigs();
-                        if (array_key_exists($moduleNamespace, $moduleConfigs['modules']) && $moduleConfigs['modules'][$moduleNamespace]['status'] === 'enable') {
-                            $moduleURL = $this->getModuleDownloadURL($moduleConfigs['modules'][$moduleNamespace]['namespace']);
+                        $isInstall = true;
+                        if (array_key_exists($moduleNamespace, $moduleConfigs['modules'])) {
+                            if ($moduleConfigs['modules'][$moduleNamespace]['status'] !== 'enable') {
+                                $isInstall = false;
+                            }
+                            if (isset($moduleConfigs['modules'][$moduleNamespace]['version'])
+                            && $moduleVersion == '') {
+                                $moduleVersion = $moduleConfigs['modules'][$moduleNamespace]['version'];
+                            }
+                        }
+                        if ($isInstall) {
+                            $moduleURL = $this->getModuleDownloadURL($moduleNamespace);
+                            if ($moduleVersion !== '') {
+                                $moduleURL .= '?version=' . $moduleVersion;
+                            }
                             $downloadedModuleName = $this->downloadModule($moduleURL, $moduleDir);
                             if ($downloadedModuleName != null) {
                                 $this->installModule($moduleDir . '/' . $downloadedModuleName);
@@ -162,6 +176,15 @@ class ModuleInstallCommand extends AbtractCommand
             $retval = self::TYPE_URL;
         } else if (strpos($moduleArg, '/') !== false || strpos($moduleArg, '\\') !== false) {
             $retval = self::TYPE_PATH;
+        }
+        return $retval;
+    }
+    private function getModuleVersion(&$name) {
+        $retval = '';
+        if (strpos($name, ':') !== false) {
+            $getVersion = explode(':', $name);
+            $name = preg_replace('/:(.*?)$/i', '', $name);
+            $retval = end($getVersion);
         }
         return $retval;
     }
