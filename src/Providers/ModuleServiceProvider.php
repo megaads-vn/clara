@@ -80,13 +80,13 @@ class ModuleServiceProvider extends ServiceProvider
                 if ($this->files->exists($currentModuleDir . '/Kernel.php')) {
                     $this->loadKernel($module);
                 }
-                $routeDir = $currentModuleDir . '/Routes';
-                if ($this->files->isDirectory($routeDir)) {
-                    $this->loadRoutes($routeDir, $module);
-                }
                 $configDir = $currentModuleDir . '/Config';
                 if ($this->files->isDirectory($configDir)) {
                     $this->loadConfig($configDir, $moduleNamespace);
+                }
+                $routeDir = $currentModuleDir . '/Routes';
+                if ($this->files->isDirectory($routeDir)) {
+                    $this->loadRoutes($routeDir, $module);
                 }
                 $viewDir = $currentModuleDir . '/Resources/Views';
                 if ($this->files->isDirectory($viewDir)) {
