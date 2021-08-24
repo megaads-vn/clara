@@ -13,6 +13,7 @@ use Megaads\Clara\Commands\ModuleMakeCommand;
 use Megaads\Clara\Commands\ModuleRemoveAllCommand;
 use Megaads\Clara\Commands\ModuleRemoveCommand;
 use Megaads\Clara\Commands\ModuleAssetLinkCommand;
+use Megaads\Clara\Commands\ModuleMigrationCommand;
 use Megaads\Clara\Commands\ModuleSubmitCommand;
 use Megaads\Clara\Module;
 use Megaads\Clara\Utils\ModuleUtil;
@@ -31,6 +32,7 @@ class ModuleServiceProvider extends ServiceProvider
         ModuleInstallCommand::class,
         ModuleAssetLinkCommand::class,
         ModuleSubmitCommand::class,
+        ModuleMigrationCommand::class,
     ];
     /**
      * Bootstrap the application services.
