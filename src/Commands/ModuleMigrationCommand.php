@@ -36,6 +36,7 @@ class ModuleMigrationCommand extends AbtractCommand
             }   
             if (!empty($locales)) {
                 foreach ($locales as $locale) {
+                    $locale = $locale['locale'];
                     if ($defaultLocale == $locale) {
                         $locale = '';
                     }
