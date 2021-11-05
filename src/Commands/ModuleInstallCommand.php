@@ -145,12 +145,18 @@ class ModuleInstallCommand extends AbtractCommand
     {
         $moduleName = null;
         $moduleTmpZipPath = $moduleDir . '/module_tmp.zip';
+        $opts=array(
+            "ssl"=>array(
+                "verify_peer"=>false,
+                "verify_peer_name"=>false,
+            ),
+        );
         try {
             echo 'Downloading module from: ' . $moduleDownloadURL . '...';
             if (filter_var($moduleDownloadURL, FILTER_VALIDATE_URL) === false) {
                 File::copy($moduleDownloadURL, $moduleTmpZipPath);
             } else {
-                file_put_contents($moduleTmpZipPath, fopen($moduleDownloadURL, 'r'));
+                file_put_contents($moduleTmpZipPath, fopen($moduleDownloadURL, 'r', false, stream_context_create($opts)));
             }
         } catch (\Throwable $th) {
             $this->response([
