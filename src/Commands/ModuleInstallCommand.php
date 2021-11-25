@@ -116,9 +116,16 @@ class ModuleInstallCommand extends AbtractCommand
             ModuleUtil::linkModuleAssets($moduleConfig);
             // set module configs
             $moduleConfigs = ModuleUtil::getAllModuleConfigs();
+            if (isset($moduleConfigs['modules'][$currentModuleNamespace])) {
+                $beforeInstallConfig = $moduleConfigs['modules'][$currentModuleNamespace];
+                unset($beforeInstallConfig['name']);
+                unset($beforeInstallConfig['namespace']);
+                unset($beforeInstallConfig['status']);
+                $moduleConfig = $moduleConfig + $beforeInstallConfig;
+            }
             $moduleConfigs['modules'][$currentModuleNamespace] = $moduleConfig;
             ModuleUtil::setModuleConfig($moduleConfigs);
-            system('composer update');
+            // system('composer update');
             // migrate module
             ModuleUtil::runMigration($moduleConfig);
             $this->response([
