@@ -62,22 +62,24 @@ class ModuleProviderLoadCommand extends AbtractCommand
             $exists = $this->checkProviderExists($appConfig, $item->class);
             if ($exists && $single && $module !== 'n/a' && $action == 'remove') {
                 $this->removeLoadedProviderClass($appConfig, $provder);
+                $appConfig = $this->writeNewConfigContent($appConfig, true);
                 break;
             } else if ($exists) {
                 continue;
-            }
-            if (isset($item->after)) {
-                $afterProvider = str_replace('"', '', json_encode($item->after));
-                $classNeedInsert = $item->class;
-                $findLineReg = "/^((?!\/\/).)*($afterProvider)/m";
-                if (preg_match($findLineReg, $appConfig, $matches)) {
-                    $this->appendNewLoadedProviders($appConfig, $matches[0], $classNeedInsert);
+            } else if (!$exists && !$single && $module == 'n/a' && $action == 'n/a') {
+                if (isset($item->after)) {
+                    $afterProvider = str_replace('"', '', json_encode($item->after));
+                    $classNeedInsert = $item->class;
+                    $findLineReg = "/^((?!\/\/).)*($afterProvider)/m";
+                    if (preg_match($findLineReg, $appConfig, $matches)) {
+                        $this->appendNewLoadedProviders($appConfig, $matches[0], $classNeedInsert);
+                        $changed = true;
+                    }
+                } else {
+                    $lastProviders = end($providers) . "::class";
+                    $this->appendNewLoadedProviders($appConfig, $lastProviders, $item->class);
                     $changed = true;
                 }
-            } else {
-                $lastProviders = end($providers) . "::class";
-                $this->appendNewLoadedProviders($appConfig, $lastProviders, $item->class);
-                $changed = true;
             }
         }
         if ($changed) {
@@ -136,14 +138,17 @@ class ModuleProviderLoadCommand extends AbtractCommand
     /**
      * 
      */
-    protected function writeNewConfigContent($content) {
+    protected function writeNewConfigContent($content, $getUpadetedContent = false) {
         $retval = 'Success! New content appended.';
         $appFile = base_path() . '/config/app.php';
-        // echo $content;die;
         try {
             $myfile = fopen($appFile, "w");
             fwrite($myfile, $content);
             fclose($myfile);
+            if ($getUpadetedContent) {
+                $appFile = base_path() . '/config/app.php';
+                $retval = file_get_contents($appFile);
+            }
         } catch (Exception $ex) {
             $retval = $ex->getMessage();
         }
@@ -171,11 +176,10 @@ class ModuleProviderLoadCommand extends AbtractCommand
      */
     protected function removeLoadedProviderClass(&$content, $removeProvider) {
         $removeProvider = str_replace('"', '', json_encode($removeProvider));
-        $removeLineReg = "/^((?!\/\/).)*($removeProvider)/m";
-        
+        // $removeLineReg = "/^((?!\/\/).)*($removeProvider)(,?)*/m";
+        $removeLineReg = "/^((?!\/\/).)*($removeProvider)(,?).*$(?:\r\n|\n)?/m";
         if (preg_match($removeLineReg, $content, $matches)) {
             $content = preg_replace($removeLineReg, "", $content);
-            $retval = $this->writeNewConfigContent($content);
         }
     }
 
