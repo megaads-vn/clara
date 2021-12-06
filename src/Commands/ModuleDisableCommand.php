@@ -2,6 +2,7 @@
 namespace Megaads\Clara\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Megaads\Clara\Utils\ModuleUtil;
 
 class ModuleDisableCommand extends AbtractCommand
@@ -39,6 +40,10 @@ class ModuleDisableCommand extends AbtractCommand
             } else {
                 // delete module asset directory
                 ModuleUtil::unlinkModuleAssets($moduleConfigs['modules'][$moduleNamespace]);
+                Artisan::call('module:providers', [
+                    'module' => $name,
+                    '--action' => 'remove'
+                ]);
                 // set module configs
                 $moduleConfigs['modules'][$moduleNamespace]['status'] = 'disable';
                 ModuleUtil::setModuleConfig($moduleConfigs);

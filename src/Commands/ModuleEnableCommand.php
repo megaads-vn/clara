@@ -2,6 +2,7 @@
 namespace Megaads\Clara\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Megaads\Clara\Utils\ModuleUtil;
 
 class ModuleEnableCommand extends AbtractCommand
@@ -42,6 +43,7 @@ class ModuleEnableCommand extends AbtractCommand
                 // set module configs
                 $moduleConfigs['modules'][$moduleNamespace]['status'] = 'enable';
                 ModuleUtil::setModuleConfig($moduleConfigs);
+                Artisan::call('module:providers');
                 $this->response([
                     "status" => "successful",
                     "message" => "Enable $name module successfully.",

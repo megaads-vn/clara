@@ -2,6 +2,7 @@
 namespace Megaads\Clara\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Megaads\Clara\Utils\ModuleUtil;
 
@@ -125,6 +126,7 @@ class ModuleInstallCommand extends AbtractCommand
             }
             $moduleConfigs['modules'][$currentModuleNamespace] = $moduleConfig;
             ModuleUtil::setModuleConfig($moduleConfigs);
+            Artisan::call("module:providers");
             // system('composer update');
             // migrate module
             ModuleUtil::runMigration($moduleConfig);

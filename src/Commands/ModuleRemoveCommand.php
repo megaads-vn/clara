@@ -2,6 +2,7 @@
 namespace Megaads\Clara\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Megaads\Clara\Utils\ModuleUtil;
 
@@ -35,6 +36,10 @@ class ModuleRemoveCommand extends AbtractCommand
                 ModuleUtil::unlinkModuleAssets($moduleConfig);
                 // rollback module migration
                 ModuleUtil::resetMigration($moduleConfig);
+                Artisan::call("module:providers", [
+                    'module' => $name,
+                    '--action' => 'remove'
+                ]);
                 // delete module directory
                 \Module::action("module_removed", $moduleConfig);
                 File::deleteDirectory($moduleDir);
