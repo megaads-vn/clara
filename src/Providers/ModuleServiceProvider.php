@@ -43,6 +43,14 @@ class ModuleServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        /** PACKAGE REGISTER */
+        $this->middlewareRegister('Megaads\Clara\Middlewares\TrafficMonitoring');
+        $this->app->register(TrafficEventServiceProvider::class);
+        $this->publishPackageRerources();
+        $this->packageRouteRegister();
+        $this->packageViewRegister();
+        $this->registryPackageMenu();
+        /** END OF PACKAGE REGIESTER */
         // Add a directive in Blade for actions
         Blade::directive('action', function ($expression) {
             return "<?php Module::action({$expression}); ?>";
@@ -210,5 +218,76 @@ class ModuleServiceProvider extends ServiceProvider
         $file = explode('/', $filePath);
         $file = end($file);
         return str_replace('.php', '', $file);
+    }
+
+    /**
+     * @param $middleware
+     * @return void
+     */
+    protected function middlewareRegister($middleware)
+    {
+        $kernel = $this->app['Illuminate\Contracts\Http\Kernel'];
+        $kernel->pushMiddleware($middleware);
+    }
+
+    /**
+     * @return void
+     */
+    protected function packageRouteRegister() {
+        if (!$this->app->routesAreCached()) {
+            include __DIR__ . '/../Routes/web.php';
+        }
+    }
+
+    /**
+     * @return void
+     */
+    protected function packageViewRegister() {
+        $this->loadViewsFrom(__DIR__.'/../Resources/Views', 'clara');
+    }
+
+    /**
+     * @return void
+     */
+    protected function publishPackageRerources()
+    {
+        if (function_exists('public_path')) {
+            $assetsPath = __DIR__ . '/../Resources/Assets/';
+            $listFiles = array_diff(scandir($assetsPath), array('.', '..'));
+            $listPaths = [];
+            foreach ($listFiles as $item) {
+                $extension = explode('.', $item);
+                $extension = array_pop($extension);
+                $listPaths[__DIR__ . '/../Resources/Assets/' . $item] = public_path('clara/assets/' . $extension . '/' . $item);
+            }
+            if (!empty($listPaths)) {
+                $this->publishes($listPaths, 'assets');
+            }
+        }
+    }
+
+    /**
+     * @return void
+     */
+    protected function registryPackageMenu()
+    {
+        \Module::onView('system.menu', function () {
+            return view('clara::inc.menu');
+        });
+//        \Module::onVariable('setting_menu', function(&$data) {
+//            $data[] = [
+//                'url' => '/traffic/requests',
+//                'icon' => 'fa-wrench',
+//                'title' => 'Page options',
+//                'subtitle' => 'Cấu hình trang tùy chỉnh',
+//                'route' => [
+//                    'name' => 'system::submodule',
+//                    'params' => [
+//                        'module' => 'settings',
+//                        'subModule' => 'page-options'
+//                    ]
+//                ],
+//            ];
+//        });
     }
 }

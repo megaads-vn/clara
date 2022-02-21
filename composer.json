@@ -39,6 +39,12 @@
             "Megaads\\Clara\\": "src/"
         }
     },
+    "scripts": {
+        "post-install-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postInstall",
+            "php artisan vendor:publish --provider=\"Megaads\\Clara\\Providers\\ModuleServiceProvider\" --tag=assets --force"
+        ]
+    },
     "extra": {
         "merge-plugin": {
             "require": [
