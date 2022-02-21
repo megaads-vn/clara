@@ -113,4 +113,15 @@ class ModuleUtil
         }        
         return $retval;
     }
+
+    public static function updatePackageAssets()
+    {
+        $retval = true;
+        \Artisan::call('php artisan vendor:publish', [
+            '--provider' => 'Megaads\Clara\Providers\ModuleServiceProvider',
+            '--tag' => 'assets',
+            '--force' => true
+        ]);
+        return $retval;
+    }
 }

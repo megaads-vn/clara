@@ -21,7 +21,6 @@
             "email": "phult.contact@gmail.com"
         }
     ],
-    "minimum-stability": "beta",
     "require": {
         "php": ">=5.6.4",
         "laravel/framework": "5.4.*",
@@ -42,20 +41,16 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "Illuminate\\Foundation\\ComposerScripts::postInstall",
-            "php artisan vendor:publish --provider=\"Megaads\\Clara\\Providers\\ModuleServiceProvider\" --tag=assets --force"
-        ],
-        "post-package-install": [
-            "Illuminate\\Foundation\\ComposerScripts::postInstall",
-            "php artisan vendor:publish --provider=\"Megaads\\Clara\\Providers\\ModuleServiceProvider\" --tag=assets --force"
+            "Megaads\\Clara\\Utils\\ModuleUtil::updatePackageAssets"
         ],
         "post-update-cmd": [
-            "Illuminate\\Foundation\\ComposerScripts::postInstall",
-            "php artisan vendor:publish --provider=\"Megaads\\Clara\\Providers\\ModuleServiceProvider\" --tag=assets --force"
+            "Megaads\\Clara\\Utils\\ModuleUtil::updatePackageAssets"
+        ],
+        "post-package-install": [
+            "Megaads\\Clara\\Utils\\ModuleUtil::updatePackageAssets"
         ],
         "post-package-update": [
-            "Illuminate\\Foundation\\ComposerScripts::postInstall",
-            "php artisan vendor:publish --provider=\"Megaads\\Clara\\Providers\\ModuleServiceProvider\" --tag=assets --force"
+            "Megaads\\Clara\\Utils\\ModuleUtil::updatePackageAssets"
         ]
     },
     "extra": {
