@@ -48,6 +48,14 @@
         "post-package-install": [
             "Illuminate\\Foundation\\ComposerScripts::postInstall",
             "php artisan vendor:publish --provider=\"Megaads\\Clara\\Providers\\ModuleServiceProvider\" --tag=assets --force"
+        ],
+        "post-update-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postInstall",
+            "php artisan vendor:publish --provider=\"Megaads\\Clara\\Providers\\ModuleServiceProvider\" --tag=assets --force"
+        ],
+        "post-package-update": [
+            "Illuminate\\Foundation\\ComposerScripts::postInstall",
+            "php artisan vendor:publish --provider=\"Megaads\\Clara\\Providers\\ModuleServiceProvider\" --tag=assets --force"
         ]
     },
     "extra": {
