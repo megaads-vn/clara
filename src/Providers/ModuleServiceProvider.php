@@ -16,6 +16,7 @@ use Megaads\Clara\Commands\ModuleAssetLinkCommand;
 use Megaads\Clara\Commands\ModuleMigrationCommand;
 use Megaads\Clara\Commands\ModuleProviderLoadCommand;
 use Megaads\Clara\Commands\ModuleSubmitCommand;
+use Megaads\Clara\Commands\PackagePublishCommand;
 use Megaads\Clara\Module;
 use Megaads\Clara\Utils\ModuleUtil;
 
@@ -35,6 +36,7 @@ class ModuleServiceProvider extends ServiceProvider
         ModuleSubmitCommand::class,
         ModuleMigrationCommand::class,
         ModuleProviderLoadCommand::class,
+        PackagePublishCommand::class,
     ];
     /**
      * Bootstrap the application services.
