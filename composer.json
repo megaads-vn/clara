@@ -23,10 +23,8 @@
     ],
     "require": {
         "php": ">=5.6.4",
-        "laravel/framework": "5.4.*",
-        "wikimedia/composer-merge-plugin": "*",
-        "illuminate/support": ">=5.3",
-        "jeremeamia/superclosure": "^2.4"
+        "laravel/framework": "5.2.*",
+        "illuminate/support": ">=5.2"
     },
     "autoload": {
         "files": [
@@ -54,18 +52,6 @@
         ]
     },
     "extra": {
-        "merge-plugin": {
-            "require": [
-                "app/Modules/*/module.json"
-            ],
-            "recurse": true,
-            "replace": false,
-            "ignore-duplicates": false,
-            "merge-dev": true,
-            "merge-extra": false,
-            "merge-extra-deep": false,
-            "merge-scripts": false
-        },
         "laravel": {
             "providers": [
                 "Megaads\\Clara\\Providers\\ClaraServiceProvider"
