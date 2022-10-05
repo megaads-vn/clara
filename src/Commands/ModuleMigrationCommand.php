@@ -58,9 +58,10 @@ class ModuleMigrationCommand extends AbtractCommand
                 }
             } else {
                 Artisan::call("migrate", [
-                    '--database' => 'mysql',
                     '--path' => 'app/Modules/' . $module . '/Migrations/'
                 ]);
+                $result = Artisan::output();
+                echo "\033[32m $result\e[0m";
             }
         } else {
             $this->error("The module no exists. Please check again!");

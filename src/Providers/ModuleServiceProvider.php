@@ -10,6 +10,9 @@ use Megaads\Clara\Commands\ModuleInstallCommand;
 use Megaads\Clara\Commands\ModuleEnableCommand;
 use Megaads\Clara\Commands\ModuleListCommand;
 use Megaads\Clara\Commands\ModuleMakeCommand;
+use Megaads\Clara\Commands\ModuleMigrationMakeCommand;
+use Megaads\Clara\Commands\ModuleMigrationRollbackCommand;
+use Megaads\Clara\Commands\ModuleMigrationStatusCommand;
 use Megaads\Clara\Commands\ModuleRemoveAllCommand;
 use Megaads\Clara\Commands\ModuleRemoveCommand;
 use Megaads\Clara\Commands\ModuleAssetLinkCommand;
@@ -23,6 +26,7 @@ use Megaads\Clara\Utils\ModuleUtil;
 class ModuleServiceProvider extends ServiceProvider
 {
     protected $files;
+    protected $appVersion;
     protected $commands = [
         ModuleMakeCommand::class,
         ModuleRemoveCommand::class,
@@ -37,7 +41,17 @@ class ModuleServiceProvider extends ServiceProvider
         ModuleMigrationCommand::class,
         ModuleProviderLoadCommand::class,
         PackagePublishCommand::class,
+        ModuleMigrationMakeCommand::class,
+        ModuleMigrationStatusCommand::class,
+        ModuleMigrationRollbackCommand::class
     ];
+
+    public function __construct($app)
+    {
+        parent::__construct($app);
+        $this->appVersion = (float) $app->version();
+    }
+
     /**
      * Bootstrap the application services.
      *
@@ -46,8 +60,10 @@ class ModuleServiceProvider extends ServiceProvider
     public function boot()
     {
         /** PACKAGE REGISTER */
-        $this->middlewareRegister('Megaads\Clara\Middlewares\TrafficMonitoring');
-        $this->app->register(TrafficEventServiceProvider::class);
+        if ($this->appVersion >= 5.3) {
+            $this->middlewareRegister('Megaads\Clara\Middlewares\TrafficMonitoring');
+            $this->app->register(TrafficEventServiceProvider::class);
+        }
         $this->publishPackageRerources();
         $this->packageRouteRegister();
         $this->packageViewRegister();
@@ -139,20 +155,22 @@ class ModuleServiceProvider extends ServiceProvider
                 }
             // }
             $routeFiles = $this->app['files']->files($routeDir);
-            foreach ($routeFiles as $file) {
-               $route = \Route::prefix($locale);
-               $fileName = $this->getFileName($file);
-               if (isset($ignoreRouteNamespace[$fileName])) {
-                   $route->namespace($ignoreRouteNamespace[$fileName]);
-               } else {
-                   $route->namespace('Modules\\' . $module . '\\Controllers');
-               }
-                $route->group($file);
-                // foreach ($route_files as $route_file) {
-                //     if ($this->files->exists($route_file)) {
-                //         include $file;
-                //     }
-                // }
+            if ($this->appVersion < 5.3) {
+                foreach ($routeFiles as $file) {
+                    if ($this->files->exists($file)) {
+                        include $file;
+                    }
+                }
+            } else {
+                foreach ($routeFiles as $file) {
+                    $route = \Route::prefix($locale);
+                    $fileName = $this->getFileName($file);
+                    if (isset($ignoreRouteNamespace[$fileName])) {
+                        $route->namespace($ignoreRouteNamespace[$fileName]);
+                    } else {
+                        $route->namespace('Modules\\' . $module . '\\Controllers');
+                    }
+                }
             }
         }
     }
@@ -236,7 +254,7 @@ class ModuleServiceProvider extends ServiceProvider
      * @return void
      */
     protected function packageRouteRegister() {
-        if (!$this->app->routesAreCached()) {
+        if (!$this->app->routesAreCached() && $this->appVersion >= 5.3) {
             include __DIR__ . '/../Routes/web.php';
         }
     }

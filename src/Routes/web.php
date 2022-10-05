@@ -2,10 +2,7 @@
 
 use Illuminate\Routing\Router;
 
-Route::name('traffic')
-    ->prefix('traffic')
-    ->middleware('web')
-    ->group(function ($router) {
+Route::group(['middleware' => 'web', 'prefix' => 'traffic'], function ($router) {
         $router->any('/api/logs/{group}', [
             'as' => 'logs.today',
             'uses' => 'Megaads\Clara\Controllers\TrafficController@today'
