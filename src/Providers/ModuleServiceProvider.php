@@ -11,7 +11,6 @@ use Megaads\Clara\Commands\ModuleEnableCommand;
 use Megaads\Clara\Commands\ModuleListCommand;
 use Megaads\Clara\Commands\ModuleMakeCommand;
 use Megaads\Clara\Commands\ModuleMigrationMakeCommand;
-use Megaads\Clara\Commands\ModuleMigrationRollbackCommand;
 use Megaads\Clara\Commands\ModuleMigrationStatusCommand;
 use Megaads\Clara\Commands\ModuleRemoveAllCommand;
 use Megaads\Clara\Commands\ModuleRemoveCommand;
@@ -42,8 +41,7 @@ class ModuleServiceProvider extends ServiceProvider
         ModuleProviderLoadCommand::class,
         PackagePublishCommand::class,
         ModuleMigrationMakeCommand::class,
-        ModuleMigrationStatusCommand::class,
-        ModuleMigrationRollbackCommand::class
+        ModuleMigrationStatusCommand::class
     ];
 
     public function __construct($app)
@@ -75,6 +73,8 @@ class ModuleServiceProvider extends ServiceProvider
         });
         // Add a directive in Blade for views
         Blade::directive('view', function ($expression) {
+            $expression = str_replace('(', '', $expression);
+            $expression = str_replace(')', '', $expression);
             return "<?php echo Module::view({$expression}); ?>";
         });
         // Add a directive in Blade for assets

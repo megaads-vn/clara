@@ -32,7 +32,7 @@ class ModuleRemoveAllCommand extends AbtractCommand
                 // delete assets directory
                 ModuleUtil::unlinkModuleAssets($item);
                 // rollback module migration
-                ModuleUtil::resetMigration($item);
+                // ModuleUtil::resetMigration($item);
                 // remove class on app providers
                 Artisan::call('module:providers', [
                     'module' => $item['name'],
