@@ -62,9 +62,9 @@
             "replace": false,
             "ignore-duplicates": false,
             "merge-dev": true,
-            "merge-extra": false,
+            "merge-extra": true,
             "merge-extra-deep": false,
-            "merge-scripts": false
+            "merge-scripts": true
         },
         "laravel": {
             "providers": [
