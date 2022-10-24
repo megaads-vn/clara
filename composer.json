@@ -54,6 +54,18 @@
         ]
     },
     "extra": {
+        "merge-plugin": {
+            "require": [
+                "app/Modules/*/module.json"
+            ],
+            "recurse": true,
+            "replace": false,
+            "ignore-duplicates": false,
+            "merge-dev": true,
+            "merge-extra": false,
+            "merge-extra-deep": false,
+            "merge-scripts": false
+        },
         "laravel": {
             "providers": [
                 "Megaads\\Clara\\Providers\\ClaraServiceProvider"
