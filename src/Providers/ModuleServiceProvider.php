@@ -145,31 +145,17 @@ class ModuleServiceProvider extends ServiceProvider
             }
             $ignoreRouteNamespace = [];
             $moduleJsonFile = app_path() . '/Modules/' . $module . '/module.json';
-            // if ($module == "Localization") {
-                if (file_exists($moduleJsonFile)) {
-                    $moduleContent = json_decode(file_get_contents($moduleJsonFile));
-                    if (isset($moduleContent->routes)) {
-                        foreach ($moduleContent->routes as $item)
-                        $ignoreRouteNamespace[$item->name] = $item->namespace;
-                    }
+            if (file_exists($moduleJsonFile)) {
+                $moduleContent = json_decode(file_get_contents($moduleJsonFile));
+                if (isset($moduleContent->routes)) {
+                    foreach ($moduleContent->routes as $item)
+                    $ignoreRouteNamespace[$item->name] = $item->namespace;
                 }
-            // }
+            }
             $routeFiles = $this->app['files']->files($routeDir);
-            if ($this->appVersion < 5.3) {
-                foreach ($routeFiles as $file) {
-                    if ($this->files->exists($file)) {
-                        include $file;
-                    }
-                }
-            } else {
-                foreach ($routeFiles as $file) {
-                    $route = \Route::prefix($locale);
-                    $fileName = $this->getFileName($file);
-                    if (isset($ignoreRouteNamespace[$fileName])) {
-                        $route->namespace($ignoreRouteNamespace[$fileName]);
-                    } else {
-                        $route->namespace('Modules\\' . $module . '\\Controllers');
-                    }
+            foreach ($routeFiles as $file) {
+                if ($this->files->exists($file)) {
+                    include $file;
                 }
             }
         }
