@@ -63,7 +63,7 @@ class ModuleMakeCommand extends AbtractCommand
                 $moduleConfigs = ModuleUtil::getAllModuleConfigs();                
                 $moduleConfigs['modules'][$moduleNamespace] = $moduleConfig;
                 ModuleUtil::setModuleConfig($moduleConfigs);
-                system('composer update');                
+                system('COMPOSER_MEMORY_LIMIT=-1 composer update -vvv');                
                 $this->response([
                     "status" => "successful",
                     "message" => "Make $name module successfully.",

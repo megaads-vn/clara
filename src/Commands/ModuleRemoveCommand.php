@@ -45,7 +45,7 @@ class ModuleRemoveCommand extends AbtractCommand
                 File::deleteDirectory($moduleDir);
                 unset($moduleConfigs['modules'][$namespace]);
                 ModuleUtil::setModuleConfig($moduleConfigs);
-                system('composer update');                
+                system('COMPOSER_MEMORY_LIMIT=-1 composer update -vvv');                
                 $this->response([
                     "status" => "successful",
                     "message" => "Remove $name module successfully.",

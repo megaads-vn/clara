@@ -77,7 +77,7 @@ class ModuleDownloadCommand extends AbtractCommand
                     $moduleConfigs = ModuleUtil::getAllModuleConfigs();
                     $moduleConfigs['modules'][$currentModuleNamespace] = $moduleConfig;
                     ModuleUtil::setModuleConfig($moduleConfigs);
-                    system('composer update');
+                    system('COMPOSER_MEMORY_LIMIT=-1 composer update -vvv');
                     // migrate module
                     ModuleUtil::runMigration($moduleConfig);
                     $this->response([

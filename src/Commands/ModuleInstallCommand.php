@@ -127,7 +127,7 @@ class ModuleInstallCommand extends AbtractCommand
             $moduleConfigs['modules'][$currentModuleNamespace] = $moduleConfig;
             ModuleUtil::setModuleConfig($moduleConfigs);
             Artisan::call("module:providers");
-             system('composer update');
+             system('COMPOSER_MEMORY_LIMIT=-1 composer update -vvv');
             // migrate module
             ModuleUtil::runMigration($moduleConfig);
             $this->response([
