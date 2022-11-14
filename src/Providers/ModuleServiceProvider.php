@@ -145,17 +145,24 @@ class ModuleServiceProvider extends ServiceProvider
             }
             $ignoreRouteNamespace = [];
             $moduleJsonFile = app_path() . '/Modules/' . $module . '/module.json';
+            $moduleContent = [];
+            $isRequireRoute = true;
             if (file_exists($moduleJsonFile)) {
-                $moduleContent = json_decode(file_get_contents($moduleJsonFile));
-                if (isset($moduleContent->routes)) {
-                    foreach ($moduleContent->routes as $item)
-                    $ignoreRouteNamespace[$item->name] = $item->namespace;
-                }
+                $moduleContent = json_decode(file_get_contents($moduleJsonFile));   
             }
-            $routeFiles = $this->app['files']->files($routeDir);
-            foreach ($routeFiles as $file) {
-                if ($this->files->exists($file)) {
-                    include $file;
+            if (isset($moduleContent->routes)) {
+                foreach ($moduleContent->routes as $item)
+                $ignoreRouteNamespace[$item->name] = $item->namespace;
+            }
+            if (isset($moduleContent->routed) && !$moduleContent->routed) {
+                $isRequireRoute = false;
+            }
+            if ($isRequireRoute) {
+                $routeFiles = $this->app['files']->files($routeDir);
+                foreach ($routeFiles as $file) {
+                    if ($this->files->exists($file)) {
+                        include $file;
+                    }
                 }
             }
         }
