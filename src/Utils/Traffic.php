@@ -22,6 +22,13 @@ class Traffic
 
     public function getPayload()
     {
+        $controlerAction = 'unknown';
+        if (request()->route() && isset(request()->route()->action)) {
+            $routeAction = request()->route()->action;
+            if (isset($routeAction['uses'])) {
+                $controlerAction = json_encode($routeAction['uses']);
+            }
+        }
         return [
             'time' => date("Y-m-d H:i:s"),
             'host' => request()->getHost(),
@@ -30,7 +37,7 @@ class Traffic
             'path' => request()->path(),
             'method' => request()->method(),
             'ajax' => request()->ajax(),
-            'action'  => request()->route()->action['uses'] ? json_encode(request()->route()->action['uses']) : '',
+            'action'  => $controlerAction,
             'params' => json_encode(request()->all()),
             'user' => request()->user()->email ?? '',
             'ip' => request()->ip(),
