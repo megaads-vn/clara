@@ -73,8 +73,10 @@ class ModuleServiceProvider extends ServiceProvider
         });
         // Add a directive in Blade for views
         Blade::directive('view', function ($expression) {
-            $expression = str_replace('(', '', $expression);
-            $expression = str_replace(')', '', $expression);
+            if ($this->appVersion == 5.2) {
+                $expression = str_replace('(', '', $expression);
+                $expression = str_replace(')', '', $expression);
+            }
             return "<?php echo Module::view({$expression}); ?>";
         });
         // Add a directive in Blade for assets
@@ -160,18 +162,10 @@ class ModuleServiceProvider extends ServiceProvider
             }
             if ($isRequireRoute) {
                 $routeFiles = $this->app['files']->files($routeDir);
-                foreach ($routeFiles as $file) {
-                    $route = \Route::prefix($locale);
-                    $fileName = $this->getFileName($file);
-                    $namespace = 'Modules\\' . $module . '\\Controllers';
-                    if (isset($ignoreRouteNamespace[$fileName])) {
-                        $namespace = $ignoreRouteNamespace[$fileName];
-                    }
-                    $routeFilePath = app_path('Modules/' . $module . '/Routes/' . $fileName . '.php');
-                    $route->namespace($namespace);
-                    $route->group(function() use ($routeFilePath) {
-                        require $routeFilePath;
-                    });
+                if ($this->appVersion == 5.2) {
+                    $this->framework52RouteRegister($routeFiles, $module);
+                } elseif ($this->appVersion == 5.4) {
+                    $this->framework54RouteRegister($routeFiles, $module);
                 }
             }
         }
@@ -311,5 +305,35 @@ class ModuleServiceProvider extends ServiceProvider
 //                ],
 //            ];
 //        });
+    }
+
+    private function framework52RouteRegister($routeFiles, $module) {
+        foreach ($routeFiles as $file) {
+            $fileName = $this->getFileName($file);
+            $namespace = 'Modules\\' . $module . '\\Controllers';
+            if (isset($ignoreRouteNamespace[$fileName])) {
+                $namespace = $ignoreRouteNamespace[$fileName];
+            }
+            $routeFilePath = app_path('Modules/' . $module . '/Routes/' . $fileName . '.php');
+            $this->app['router']->group(['namespace' => $namespace], function () use($routeFilePath) {
+                require $routeFilePath;
+            });
+        }
+    }
+
+    private function framework54RouteRegister($routeFiles, $module) {
+        foreach ($routeFiles as $file) {
+            $route = \Route::prefix($locale);
+            $fileName = $this->getFileName($file);
+            $namespace = 'Modules\\' . $module . '\\Controllers';
+            if (isset($ignoreRouteNamespace[$fileName])) {
+                $namespace = $ignoreRouteNamespace[$fileName];
+            }
+            $routeFilePath = app_path('Modules/' . $module . '/Routes/' . $fileName . '.php');
+            $route->namespace($namespace);
+            $route->group(function() use ($routeFilePath) {
+                require $routeFilePath;
+            });
+        }
     }
 }
