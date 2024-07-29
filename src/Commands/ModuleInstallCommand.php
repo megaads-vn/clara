@@ -58,6 +58,7 @@ class ModuleInstallCommand extends AbtractCommand
             }
         } else {
             $moduleType = $this->checkModuleArgType($module);
+            $this->backupBeforeDownload($module);
             switch ($moduleType) {
                 case self::TYPE_NAME:
                     {
@@ -158,6 +159,19 @@ class ModuleInstallCommand extends AbtractCommand
                     "namespace" => $currentModuleNamespace,
                 ],
             ]);
+
+            if (file_exists(app_path("Modules/{$currentModuleName}/output.txt"))) {
+                $outputContent = file_get_contents(app_path("Modules/{$currentModuleName}/output.txt"));
+
+                $this->response([
+                    "status" => "warning",
+                    "message" => "------------ Logging ----------\n\n {$outputContent}",
+                    "module" => [
+                        "name" => $currentModuleName,
+                        "namespace" => $currentModuleNamespace,
+                    ],
+                ]);
+            }
             \Module::action("module_made", $moduleConfigs['modules'][$currentModuleNamespace]);
         } else {
             $this->response([
@@ -336,5 +350,54 @@ class ModuleInstallCommand extends AbtractCommand
             && !preg_match('/(\d+)\.(\d+)\.*/i', $moduleVersion, $matchesAsterisk)) {
             $moduleURL .= '?version=dev-' . $moduleVersion;
         }
+    }
+    
+
+    private function backupBeforeDownload($module) {
+        $storagePath = storage_path("/modules/backup/{$module}");
+        $modulePath = app_path("Modules/{$module}");
+        $this->response([
+            "status" => "warning",
+            "message" => "Backup module {$module} before download. \nBackup path: {$storagePath} \n-----------------\n",
+        ]);
+        // Kiểm tra và tạo thư mục backup nếu chưa tồn tại
+        if (!file_exists($storagePath)) {
+            mkdir($storagePath, 0777, true);
+        }
+        // Nén thư mục module
+        $zip = new \ZipArchive();
+        $zipFileName = "{$storagePath}/{$module}_" . date('Ymd_His') . ".zip";
+        if ($zip->open($zipFileName, \ZipArchive::CREATE) === TRUE) {
+            $this->addFolderToZip($modulePath, $zip);
+            $zip->close();
+        } else {
+            throw new Exception("Không thể tạo file zip: {$zipFileName}");
+        }
+    
+        // Kiểm tra số lượng file backup và xóa file cũ nhất nếu vượt quá 3
+        $backupFiles = glob("{$storagePath}/*.zip");
+        if (count($backupFiles) > 3) {
+            usort($backupFiles, function($a, $b) {
+                return filemtime($a) - filemtime($b);
+            });
+            unlink($backupFiles[0]);
+        }
+    }
+    
+    private function addFolderToZip($folder, &$zip, $folderInZip = '') {
+        $handle = opendir($folder);
+        while (false !== ($entry = readdir($handle))) {
+            if ($entry != '.' && $entry != '..') {
+                $path = "{$folder}/{$entry}";
+                $pathInZip = $folderInZip ? "{$folderInZip}/{$entry}" : $entry;
+                if (is_dir($path)) {
+                    $zip->addEmptyDir($pathInZip);
+                    $this->addFolderToZip($path, $zip, $pathInZip);
+                } else {
+                    $zip->addFile($path, $pathInZip);
+                }
+            }
+        }
+        closedir($handle);
     }
 }

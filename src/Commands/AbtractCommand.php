@@ -40,6 +40,8 @@ class AbtractCommand extends Command
         $response = json_encode($data);
         if ($data['status'] == 'successful') {
             $this->displayMessage($data['message'], 's');
+        } else if ($data['status'] == 'warning') {
+            $this->displayMessage($data['message'], 'w');
         } else {
             $this->displayMessage($data['message'], 'e');
         }
