@@ -354,6 +354,7 @@ class ModuleInstallCommand extends AbtractCommand
     
 
     private function backupBeforeDownload($module) {
+        $module = preg_replace('/:dev-(.*)/i', '',$module);
         $storagePath = storage_path("/modules/backup/{$module}");
         $modulePath = app_path("Modules/{$module}");
         $this->response([
