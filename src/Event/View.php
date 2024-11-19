@@ -21,10 +21,10 @@ class View extends AbtractEvent
             $this->value = '';
         }
         // Initialize a stack to store the result of each sub-view
-        $bufferStack = [];
+        $bufferStackArr = [];
         // Check the event
         if (count($this->getListeners()->where('hook', $action)) > 0) {
-            $this->getListeners()->where('hook', $action)->each(function ($listener) use ($action, $args, $isMultiLayer, &$bufferStack) {
+            $this->getListeners()->where('hook', $action)->each(function ($listener) use ($action, $args, $isMultiLayer, &$bufferStackArr) {
                 $parameters = [];
                 // Get the necessary parameters
                 for ($i = 0; $i < $listener['arguments']; $i++) {
@@ -32,15 +32,17 @@ class View extends AbtractEvent
                 }
                 $result = $this->callListenerFunction($listener, $parameters);
                 // Add the result to the stack
-                $bufferStack[] = $result;
+                $bufferStackArr[$action][] = $result;
             });
         }
 
         // Get the final result from the stack
         if ($isMultiLayer || $isMultiLayer === null) {
             // Instead of concatenating each time, just get the result from the last element of the stack
-            $this->value = end($bufferStack);
+            $bufferStack = isset($bufferStackArr[$action]) ? $bufferStackArr[$action] : [];
+            $this->value = join('', $bufferStack);
         } else if ($isMultiLayer === false) {
+            $bufferStack = isset($bufferStackArr[$action]) ? $bufferStackArr[$action] : [];
             $this->value = reset($bufferStack);
         }
         return $this->value;
