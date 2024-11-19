@@ -105,12 +105,16 @@ class ModuleUtil
 
     public static function resetMigration($moduleConfig = null) {
         $retval = false;
-        if ($moduleConfig !== null) {
-            \Artisan::call('migrate:reset', [
-                '--path' => 'app/Modules/' . $moduleConfig['name'] . '/Migrations/'
-            ]);
-            $retval = true;
-        }        
+        try {
+            if ($moduleConfig !== null) {
+                \Artisan::call('migrate:reset', [
+                    '--path' => 'app/Modules/' . $moduleConfig['name'] . '/Migrations/'
+                ]);
+                $retval = true;
+            }        
+        } catch (\Exception $e) {
+            $retval = false;
+        }
         return $retval;
     }
 }

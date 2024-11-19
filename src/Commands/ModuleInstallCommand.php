@@ -386,6 +386,9 @@ class ModuleInstallCommand extends AbtractCommand
     }
     
     private function addFolderToZip($folder, &$zip, $folderInZip = '') {
+        if (!is_dir($folder)) {
+            return;
+        }
         $handle = opendir($folder);
         while (false !== ($entry = readdir($handle))) {
             if ($entry != '.' && $entry != '..') {
