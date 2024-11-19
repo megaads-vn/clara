@@ -16,36 +16,33 @@ class View extends AbtractEvent
      */
     public function fire($action, $args = [], $isMultiLayer = true)
     {
-        $this->value = isset($args[0]) ? $args[0] : ''; 
+        $this->value = isset($args[0]) ? $args[0] : ''; // get the value, the first argument is always the value
         if (!is_string($this->value)) {
             $this->value = '';
         }
-        // Initialize a stack to store the result of each sub-view
-        $bufferStack = [];
-        // Check the event
         if (count($this->getListeners()->where('hook', $action)) > 0) {
-            $this->getListeners()->where('hook', $action)->each(function ($listener) use ($action, $args, $isMultiLayer, &$bufferStack) {
+            $this->value = '';
+            $this->getListeners()->where('hook', $action)->each(function ($listener) use ($action, $args, $isMultiLayer) {
                 $parameters = [];
-                // Get the necessary parameters
+                // $args[0] = $this->value;
                 for ($i = 0; $i < $listener['arguments']; $i++) {
-                    $parameters[] = $args[$i] ?? [];
+                    if (isset($args[$i])) {
+                        $value = $args[$i];
+                        $parameters[] = $value;
+                    } else {
+                        $parameters[] = [];
+                        break;
+                    }
                 }
-                $result = $this->callListenerFunction($listener, $parameters);
-                // Add the result to the stack
-                $bufferStack[] = $result;
+                if ($isMultiLayer || $isMultiLayer === null) {
+                    $this->value .= $this->callListenerFunction($listener, $parameters);
+                } else if ($isMultiLayer === false) {
+                    $this->value = $this->callListenerFunction($listener, $parameters);
+                }
             });
-        }
-
-        // Get the final result from the stack
-        if ($isMultiLayer || $isMultiLayer === null) {
-            // Instead of concatenating each time, just get the result from the last element of the stack
-            $this->value = end($bufferStack);
-        } else if ($isMultiLayer === false) {
-            $this->value = reset($bufferStack);
         }
         return $this->value;
     }
-
     private function callListenerFunction($listener, $parameters)
     {
         $retval = null;
