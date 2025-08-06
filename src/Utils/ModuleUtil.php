@@ -2,6 +2,7 @@
 
 namespace Megaads\Clara\Utils;
 
+use Exception;
 use Illuminate\Support\Facades\File;
 
 class ModuleUtil
@@ -12,17 +13,21 @@ class ModuleUtil
     public static function setModuleConfig($configs = [])
     {
         $data = [];
-        if (File::exists(base_path('module.json'))) {
-            $jsonString = file_get_contents(base_path('module.json'));
-            $data = json_decode($jsonString, true);
+        try {
+            if (File::exists(base_path('module.json'))) {
+                $jsonString = file_get_contents(base_path('module.json'));
+                $data = json_decode($jsonString, true);
+            }
+            // Update Key
+            foreach ($configs as $key => $value) {
+                $data[$key] = $value;
+            }
+            // Write File
+            $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
+            file_put_contents(base_path('module.json'), stripslashes($newJsonString));
+        } catch (\Exception $ex) {
+            throw $ex;
         }
-        // Update Key
-        foreach ($configs as $key => $value) {
-            $data[$key] = $value;
-        }
-        // Write File
-        $newJsonString = json_encode($data, JSON_PRETTY_PRINT);
-        file_put_contents(base_path('module.json'), stripslashes($newJsonString));
     }
     /**
      * Get all module config values
@@ -30,9 +35,13 @@ class ModuleUtil
     public static function getAllModuleConfigs($configs = [])
     {
         $retval = [];
-        if (File::exists(base_path('module.json'))) {
-            $jsonString = file_get_contents(base_path('module.json'));
-            $retval = json_decode($jsonString, true);
+        try {
+            if (File::exists(base_path('module.json'))) {
+                $jsonString = file_get_contents(base_path('module.json'));
+                $retval = json_decode($jsonString, true);
+            }
+        } catch (\Exception $ex) {
+            throw $ex;
         }
         return $retval;
     }
@@ -51,29 +60,33 @@ class ModuleUtil
     public static function linkModuleAssets($moduleConfig = null)
     {
         $retval = false;
-        if ($moduleConfig !== null) {
-            // make asset directory
-            $assetDir = public_path() . '/modules';
-            if (!File::isDirectory($assetDir)) {
-                File::makeDirectory($assetDir);
-                $retval = true;
-            }
-            // create tmp link
-            $srcAssetDir = app_path() . '/Modules' . '/' . $moduleConfig['name'] . '/Resources/Assets';
-            if (!File::isDirectory($assetDir . '/tmp')) {
-                File::makeDirectory($assetDir . '/tmp');
-            }
-            // link module assets and remove tmp link
-            if (File::isDirectory($srcAssetDir)) {
-                if (!windows_os()) {
-                    system('ln -s ' . $srcAssetDir . ' ' . $assetDir . '/tmp');
-                    File::move($assetDir . '/tmp/Assets', $assetDir . '/' . $moduleConfig['namespace']);
-                } else {
-                    $assetDir .= '/' . $moduleConfig['namespace'];
-                    exec("mklink /J \"{$assetDir}\" \"{$srcAssetDir}\"");
+        try {
+            if ($moduleConfig !== null) {
+                // make asset directory
+                $assetDir = public_path() . '/modules';
+                if (!File::isDirectory($assetDir)) {
+                    File::makeDirectory($assetDir);
+                    $retval = true;
                 }
-                $retval = true;
+                // create tmp link
+                $srcAssetDir = app_path() . '/Modules' . '/' . $moduleConfig['name'] . '/Resources/Assets';
+                if (!File::isDirectory($assetDir . '/tmp')) {
+                    File::makeDirectory($assetDir . '/tmp');
+                }
+                // link module assets and remove tmp link
+                if (File::isDirectory($srcAssetDir)) {
+                    if (!windows_os()) {
+                        system('ln -s ' . $srcAssetDir . ' ' . $assetDir . '/tmp');
+                        File::move($assetDir . '/tmp/Assets', $assetDir . '/' . $moduleConfig['namespace']);
+                    } else {
+                        $assetDir .= '/' . $moduleConfig['namespace'];
+                        exec("mklink /J \"{$assetDir}\" \"{$srcAssetDir}\"");
+                    }
+                    $retval = true;
+                }
             }
+        } catch (\Exception $ex) {
+            throw $ex;
         }
         return $retval;
     }
@@ -92,13 +105,17 @@ class ModuleUtil
         return $retval;
     }
 
-    public static function runMigration($moduleConfig = null) {
+    public static function runMigration($moduleConfig = null, $isRollback = false) {
         $retval = false;
-        if ($moduleConfig !== null) {
-            \Artisan::call('migrate', [
-                '--path' => 'app/Modules/' . $moduleConfig['name'] . '/Migrations/'
-            ]);
-            $retval = true;
+        try {
+            if ($moduleConfig !== null) {
+                \Artisan::call('migrate', [
+                    '--path' => 'app/Modules/' . $moduleConfig['name'] . '/Migrations/'
+                ]);
+                $retval = true;
+            }
+        } catch (\Exception $ex) {
+            throw $ex;
         }
         return $retval;
     }
