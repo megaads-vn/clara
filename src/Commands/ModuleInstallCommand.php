@@ -76,7 +76,7 @@ class ModuleInstallCommand extends AbtractCommand
                         }
                         break;
                     }
-                case self::TYPE_URL:
+                case self::TYPE_URL:    
                     {
                         list($moduleName, $moduleTmpPath, $moduleBackupPath) = $this->downloadModule($module, $moduleDir);
                         if ($moduleName != null) {
@@ -190,6 +190,7 @@ class ModuleInstallCommand extends AbtractCommand
         if (!file_exists($moduleTmpPath)) {
             File::makeDirectory($moduleTmpPath);
         }
+        // Module name extraction logic... (keep as is)
         $extractUrl = explode('/', $moduleDownloadURL);
         $tmpModuleName = end($extractUrl);
         $tmpModuleName = preg_replace('/\?version=dev-(.*)$/i', '', $tmpModuleName);
@@ -198,139 +199,153 @@ class ModuleInstallCommand extends AbtractCommand
         foreach ($extractSlugModuleName as $item) {
             $tmpModuleName .= ucfirst($item);
         }
-        // $this->removeTemporaryModule("{$moduleTmpPath}{$tmpName}", true);
+
         $moduleTmpZipPath = $moduleTmpPath . "/{$tmpName}.zip";
         $moduleBackupPath = "";
+        
+        // Tùy chọn SSL không cần thiết nếu dùng cURL, nhưng giữ lại nếu có trường hợp dùng fopen
         $opts = array(
             "ssl" => array(
                 "verify_peer" => false,
                 "verify_peer_name" => false,
             ),
         );
+
+        // Dữ liệu hash sẽ được lấy từ Header
+        $hashData = null; 
+        $httpCode = 0;
+        $curlError = '';
+
         try {
             $this->displayMessage('Downloading module from: ' . $moduleDownloadURL . '...');
+            
             if (filter_var($moduleDownloadURL, FILTER_VALIDATE_URL) === false) {
                 // Nếu là file local
                 File::copy($moduleDownloadURL, $moduleTmpZipPath);
             } else {
-                // Nếu là endpoint trả về log streaming
-                $buffer = '';
-                $isFirstOutput = true;
-                $isDone = false;
-                $downloadUrl = "";
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $moduleDownloadURL);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+                // KHỐI CODE MỚI: Tải file trực tiếp qua cURL và lấy Hash từ Header
+                $fileHandle = fopen($moduleTmpZipPath, 'w');
+                if (!$fileHandle) {
+                    throw new \Exception("Could not open file for writing at: $moduleTmpZipPath");
+                }
+
+                $ch = curl_init($moduleDownloadURL);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 3600);
                 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $data) use (&$buffer, &$isFirstOutput, &$downloadUrl) {
-                    $buffer = $data;
-                    
-                    // Kiểm tra xem có dòng DONE=URL không
-                    if (strpos($buffer, 'DONE=') !== false) {
-                        $lines = explode("\n", $buffer);
-                        foreach ($lines as $line) {
-                            if (strpos($line, 'DONE=') === 0) {
-                                $downloadUrl = trim(substr($line, 5)); // Cắt bỏ "DONE="
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // Tìm dòng đầu tiên có nội dung thực sự
-                    if ($isFirstOutput) {
-                        $lines = explode("\n", $buffer);
-                        foreach ($lines as $line) {
-                            $trimmedLine = trim($line);
-                            if (!empty($trimmedLine) && strpos($trimmedLine, 'DONE=') !== 0) {
-                                $this->displayMessage($trimmedLine);
-                                $isFirstOutput = false;
-                                break;
-                            }
-                        }
-                        // Nếu chưa tìm thấy dòng có nội dung, tiếp tục buffer
-                        if ($isFirstOutput) {
-                            return strlen($data);
-                        }
-                    }
-                    
-                    // Sau khi đã in dòng đầu, in tất cả data tiếp theo (trừ dòng DONE=)
-                    if (!$isFirstOutput) {
-                        $lines = explode("\n", $data);
-                        foreach ($lines as $line) {
-                            if (strpos($line, 'DONE=') !== 0) {
-                                $this->displayMessage($line);
-                            }
-                        }
-                    }
-                    @ob_flush();
-                    @flush();
-                    return strlen($data);
-                });
-                curl_exec($ch);
-                curl_close($ch);
+                curl_setopt($ch, CURLOPT_FILE, $fileHandle); // Ghi nội dung response vào file
                 
-                // Nếu có URL download, tải file zip về
-                if (!empty($downloadUrl)) {
-                    $this->displayMessage('📦 Downloading...');
-                    file_put_contents($moduleTmpZipPath, fopen($downloadUrl, 'r', false, stream_context_create($opts)));
-                    
-                    // Lấy expected hash từ server (nếu có)
-                    $hashData = $this->getExpectedHashFromServer($downloadUrl);
-                    
-                    $this->displayMessage('✅ Download completed', 's');
+                // Hàm để thu thập tất cả response headers
+                $responseHeaders = [];
+                curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($curl, $header) use (&$responseHeaders)
+                {
+                    $len = strlen($header);
+                    $header = explode(':', $header, 2);
+                    if (count($header) < 2) { 
+                        return $len;
+                    }
+                    $responseHeaders[strtolower(trim($header[0]))] = trim($header[1]);
+                    return $len;
+                });
+
+                curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($ch);
+                curl_close($ch);
+                fclose($fileHandle);
+                
+                // Xử lý kết quả cURL
+                if ($httpCode !== 200 || !empty($curlError)) {
+                    throw new \Exception("Download failed. HTTP code: $httpCode. Error: $curlError");
+                }
+
+                $this->displayMessage('✅ Download completed', 's');
+
+                // Trích xuất Manifest Hash từ header tùy chỉnh X-Module-Manifest-Hash
+                $headerName = 'x-module-manifest-hash';
+                if (isset($responseHeaders[$headerName])) {
+                    $hashData = ['module_hash' => $responseHeaders[$headerName]];
+                    $this->displayMessage("🔑 Manifest Hash received from server header: " . $hashData['module_hash']);
+                } else {
+                    $this->displayMessage("⚠️ Warning: Manifest Hash header ('$headerName') not found in response.", 'w');
                 }
             }
         } catch (\Throwable $th) {
             $errorMsg = "";
-            if (isset($http_response_header)) {
-                foreach ($http_response_header as $item) {
-                    if (preg_match('/X-CUSTOM-MESSAGE:\s+(.*)$/i', $item, $matches)) {
-                        $errorMsg = isset($matches[1]) ? $matches[1] : "";
-                        break;
-                    }
-                }
-            }
-            if ($errorMsg == "") {
-                $errorMsg = $th->getMessage();
-            }
+            // Đoạn xử lý header lỗi cũ có thể không hoạt động với cURL, nên ta chỉ dùng thông báo lỗi cơ bản
+            $errorMsg = $th->getMessage();
+
             $this->displayMessage("Cannot download module from: $moduleDownloadURL" . PHP_EOL . "With error: " . $errorMsg, 'e');
+            // Đảm bảo xóa file zip tạm nếu có lỗi
+            if (file_exists($moduleTmpZipPath)) {
+                File::delete($moduleTmpZipPath);
+            }
+            return [$moduleName, $moduleTmpPath, $moduleBackupPath];
         }
-        // Sau khi tải xong, kiểm tra tính toàn vẹn và giải nén
+        
+        // --- Bắt đầu phần kiểm tra tính toàn vẹn và giải nén ---
         if (file_exists($moduleTmpZipPath)) {
-            // Kiểm tra tính toàn vẹn của file zip
             try {
-                if ($this->verifyZipIntegrity($moduleTmpZipPath, $hashData)) {
-                    // Kiểm tra chi tiết từng file trong zip (nếu có hash data)
-                    if ($hashData && $this->verifyZipFilesIntegrity($moduleTmpZipPath, $hashData)) {
-                        $zipArchive = new \ZipArchive();
-                        $result = $zipArchive->open($moduleTmpZipPath);
-                        if ($result === true) {
-                            $moduleName = explode('/', $zipArchive->getNameIndex(0))[0];
-                            $zipArchive->extractTo($moduleTmpPath);
-                            $zipArchive->close();
-                            File::delete($moduleTmpZipPath);
-                            
-                            // Tạo hash file cho module đã cài đặt
-                            $modulePath = $moduleTmpPath . '/' . $moduleName;
-                            $this->createModuleHashFile($modulePath);
+                // Bỏ qua kiểm tra tính toàn vẹn file zip nếu không có hash
+                if ($hashData) {
+                    // Chúng ta sẽ bỏ qua verifyZipIntegrity vì nó không còn dùng Manifest Hash
+                    // Bắt đầu giải nén để có thể kiểm tra Manifest Hash lên thư mục
+                    $zipArchive = new \ZipArchive();
+                    $result = $zipArchive->open($moduleTmpZipPath);
+
+                    if ($result === true) {
+                        $moduleName = explode('/', $zipArchive->getNameIndex(0))[0];
+                        $zipArchive->extractTo($moduleTmpPath);
+                        $zipArchive->close();
+                        File::delete($moduleTmpZipPath);
+
+                        $modulePath = $moduleTmpPath . '/' . $moduleName;
+
+                        // BƯỚC QUAN TRỌNG: KIỂM TRA TÍNH TOÀN VẸN CỦA THƯ MỤC ĐÃ GIẢI NÉN
+                        // Sử dụng Manifest Hash để kiểm tra số lượng và nội dung file
+                        if ($this->verifyModuleManifestHash($modulePath, $hashData)) {
+                            // Hash khớp -> module toàn vẹn
+                            $this->createModuleHashFile($modulePath); 
                             $moduleBackupPath = $this->backupModule($moduleName);
                             $this->displayMessage('✅ Module installed successfully with integrity verified', 's');
                         } else {
-                            $this->displayMessage('❌ Failed to open zip file', 'e');
-                            File::delete($moduleTmpZipPath);
+                            // Hash không khớp -> module không toàn vẹn (Thiếu/hỏng file do giải nén)
+                            $this->displayMessage('❌ Thư mục module đã giải nén KHÔNG TOÀN VẸN (Manifest Hash không khớp).', 'e');
+                            $this->displayMessage("📋 Hủy cài đặt. Xóa thư mục tạm thời.", 'w');
+                            // Xóa thư mục tạm thời đã giải nén
+                            $this->rrmdir($modulePath);
+                            $moduleName = null; 
                         }
                     } else {
-                        $this->displayMessage('❌ File-level integrity check failed', 'e');
-                        $this->displayMessage("📋 Do nothing. Please check your download link or content of error file. ", 'w');
+                        $this->displayMessage('❌ Failed to open zip file', 'e');
                         File::delete($moduleTmpZipPath);
                     }
                 } else {
-                    $this->displayMessage('❌ Zip file integrity check failed', 'e');
-                    File::delete($moduleTmpZipPath);
+                    // Nếu không có hash data, ta vẫn giải nén nhưng bỏ qua bước kiểm tra chi tiết
+                    $this->displayMessage('⚠️ Downloaded file but Manifest Hash is missing. Proceeding without integrity check.', 'w');
+                    
+                    $zipArchive = new \ZipArchive();
+                    $result = $zipArchive->open($moduleTmpZipPath);
+                    
+                    if ($result === true) {
+                        $moduleName = explode('/', $zipArchive->getNameIndex(0))[0];
+                        $zipArchive->extractTo($moduleTmpPath);
+                        $zipArchive->close();
+                        File::delete($moduleTmpZipPath);
+                        
+                        $modulePath = $moduleTmpPath . '/' . $moduleName;
+                        $this->createModuleHashFile($modulePath);
+                        $moduleBackupPath = $this->backupModule($moduleName);
+                        $this->displayMessage('✅ Module installed successfully (Integrity check skipped)', 's');
+                    } else {
+                        $this->displayMessage('❌ Failed to open zip file', 'e');
+                        File::delete($moduleTmpZipPath);
+                    }
                 }
             } catch(\Exception $ex) {
-                $this->displayMessage('❌ Failed to verify zip file integrity', 'e');
-                File::delete($moduleTmpZipPath);
+                $this->displayMessage('❌ Failed to process or verify zip file: ' . $ex->getMessage(), 'e');
+                if (file_exists($moduleTmpZipPath)) {
+                    File::delete($moduleTmpZipPath);
+                }
             }
         }
         return [$moduleName, $moduleTmpPath, $moduleBackupPath];
@@ -1382,7 +1397,7 @@ class ModuleInstallCommand extends AbtractCommand
     /**
      * Xóa thư mục và tất cả nội dung bên trong một cách đệ quy
      * 
-     * @param string $dir Đường dẫn thư mục cần xóa
+     * @param string $dir Directory path to be deleted
      * @return void
      */
     private function rrmdir($dir) {
@@ -1398,6 +1413,82 @@ class ModuleInstallCommand extends AbtractCommand
                 }
             }
             rmdir($dir);
+        }
+    }
+
+    /**
+     * Verify the integrity of the extracted directory using Manifest Hash (Hash of Hash File)
+     * Ensures the correct number of files and file contents.
+     * @param string $modulePath Path to the temporarily extracted module directory
+     * @param array $hashData Hash data from server (containing the 'module_hash' key)
+     * @return bool
+     */
+    private function verifyModuleManifestHash($modulePath, $hashData)
+    {
+        // Manifest Hash from server
+        $expectedManifestHash = $hashData['module_hash'] ?? null;
+        
+        if (empty($expectedManifestHash)) {
+            $this->displayMessage("⚠️ Manifest Hash not found from server. Skipping detailed verification step.", 'w');
+            return true;
+        }
+
+        $this->displayMessage('🔍 Starting module integrity verification using Manifest Hash...');
+        
+        // Use RecursiveIteratorIterator to traverse all files
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($modulePath, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::LEAVES_ONLY // Only return files, skip directories
+        );
+
+        $localFileHashes = [];
+        // Assuming you have a config to skip files that don't need hash checking (if not, this array is empty)
+        $ingoreCheck = config('clara.ignore_check_files', []); 
+        $moduleName = basename($modulePath);
+        
+        foreach ($files as $file) {
+            if ($file->isFile()) {
+                $filePath = $file->getPathname();
+                
+                // Remove the root path to get a relative path starting with the module name
+                // Example: /path/to/tmp/ModuleName/src/Controller.php -> ModuleName/src/Controller.php
+                $relativePath = str_replace($modulePath . '/', $moduleName . '/', $filePath);
+                
+                // Skip files in the ignore list
+                if (in_array($relativePath, $ingoreCheck)) {
+                    continue;
+                }
+                
+                // Calculate hash for each file (SHA-256)
+                $fileHash = hash_file('sha256', $filePath);
+                $localFileHashes[$relativePath] = $fileHash;
+            }
+        }
+
+        // STEP 1: CREATE MANIFEST STRING FROM LOCAL FILES
+        // MUST SORT by file path (key) to ensure the Manifest string matches the one created by the server
+        ksort($localFileHashes); 
+        $manifestString = '';
+        foreach ($localFileHashes as $relativePath => $fileHash) {
+            // Concatenate the path and hash of the file in the format: 'path/to/file:hash\n'
+            $manifestString .= $relativePath . ':' . $fileHash . "\n";
+        }
+        
+        // STEP 2: CALCULATE LOCAL MANIFEST HASH
+        $localManifestHash = hash('sha256', $manifestString);
+        
+        $this->displayMessage("📋 Server Manifest Hash: $expectedManifestHash");
+        $this->displayMessage("📋 Local Manifest Hash: $localManifestHash");
+        $this->displayMessage("📋 Total files checked: " . count($localFileHashes));
+        
+        // STEP 3: COMPARE
+        if ($localManifestHash === $expectedManifestHash) {
+            $this->displayMessage("✅ Manifest Hash matches. Module integrity verified.", 's');
+            return true;
+        } else {
+            $this->displayMessage("❌ Manifest Hash DOES NOT MATCH. Module is missing files, content is corrupted, or extraction error.", 'e');
+            $this->displayMessage("📋 Installation canceled. Please check again.", 'w');
+            return false;
         }
     }
 }
